@@ -1,0 +1,44 @@
+manifest_version: 1
+
+version:
+  name: V1
+  label: "Version One"
+  comment: "The first version of a POC Snowflake Native App"
+
+privileges:
+  - CREATE COMPUTE POOL:
+      description: "Permission to create services + compute pools."
+  - BIND SERVICE ENDPOINT:
+      description: "Required to create endpoints we can assign to functions and such."
+  - CREATE WAREHOUSE:
+      description: "Create a warehouse dedicated to the application to track costs."
+  - CREATE EXTERNAL ACCESS INTEGRATION:
+      description: "Required to create external access integrations for OpenAI API access."
+
+artifacts:
+  readme: readme.md
+  setup_script: setup.sql
+  default_web_endpoint:
+    service: core.poc_napp_app_service
+    endpoint: app
+  container_services:
+    images:
+      - /poc_napp_db/schema/image_repo/frontend
+      - /poc_napp_db/schema/image_repo/backend
+
+references:
+  - openai_external_access:
+      label: "OpenAI External Access Integration"
+      description: "Required to access OpenAI API endpoints"
+      privileges:
+        - USAGE
+      object_type: EXTERNAL ACCESS INTEGRATION
+      required_at_setup: true
+      register_callback: core.register_openai_eai
+      configuration_callback: core.get_config_for_ref
+
+configuration:
+  grant_callback: core.start_app
+  log_level: debug
+  trace_level: always
+  metric_level: all

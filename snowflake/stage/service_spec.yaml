@@ -1,0 +1,14 @@
+spec:
+  containers:
+    - name: frontend
+      image: /poc_napp_db/schema/image_repo/frontend
+    - name: backend
+      image: /poc_napp_db/schema/image_repo/backend
+      env:
+        OPENAI_API_KEY: sk-svcacct-pjE8GEmFWi_uwIVaOEoIqqesOEnPOzFb02HVgHAliGBawk9r1T3BlbkFJm-XLTn9j4gG4Y5EUHYTcEiCKrLYrvZJTXBVPRcdjNeNHxWxAA
+  endpoints:
+    - name: app
+      port: 3000
+      public: true
+    - name: api
+      port: 8000

@@ -50,7 +50,7 @@ async def analyze_feedback(request: FeedbackRequest):
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a helpful assistant that analyzes customer feedback. Provide sentiment analysis, a brief summary, and 2-3 actionable suggestions."
+                    "content": "You are a helpful assistant that analyzes customer feedback. Please respond in the following JSON format:\n{\n  \"sentiment\": \"positive/negative/neutral\",\n  \"summary\": \"brief summary of the feedback\",\n  \"suggestions\": [\"suggestion 1\", \"suggestion 2\"]\n}"
                 },
                 {
                     "role": "user",
@@ -60,12 +60,29 @@ async def analyze_feedback(request: FeedbackRequest):
             max_tokens=300
         )
         
-        analysis = response.choices[0].message.content
+        analysis_text = response.choices[0].message.content
+        
+        # Try to parse JSON response, fallback to simple analysis if it fails
+        try:
+            import json
+            analysis_data = json.loads(analysis_text)
+            sentiment = analysis_data.get("sentiment", "neutral")
+            summary = analysis_data.get("summary", analysis_text)
+        except json.JSONDecodeError:
+            # Fallback: try to extract sentiment from the text
+            analysis_lower = analysis_text.lower()
+            if any(word in analysis_lower for word in ["positive", "good", "great", "excellent", "love", "like"]):
+                sentiment = "positive"
+            elif any(word in analysis_lower for word in ["negative", "bad", "poor", "terrible", "hate", "dislike"]):
+                sentiment = "negative"
+            else:
+                sentiment = "neutral"
+            summary = analysis_text
         
         return FeedbackResponse(
             original_text=request.text,
-            sentiment="N/A",
-            summary=analysis
+            sentiment=sentiment,
+            summary=summary
         )
         
     except Exception as e:
