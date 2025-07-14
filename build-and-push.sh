@@ -11,7 +11,7 @@ IMAGE_REPO_URL=$(snow spcs image-repository url $IMAGE_REPO_NAME --database $DB_
 # docker login $IMAGE_REPO_URL -u $SNOWFLAKE_USER
 
 # Build and push frontend
-cd frontend/poc-napp
+cd frontend/
 docker build --platform linux/amd64 -t frontend .
 docker tag frontend $IMAGE_REPO_URL/frontend
 docker push $IMAGE_REPO_URL/frontend
