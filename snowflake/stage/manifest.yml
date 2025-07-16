@@ -25,6 +25,7 @@ artifacts:
     images:
       - /poc_napp_db/schema/image_repo/frontend
       - /poc_napp_db/schema/image_repo/backend
+      - /poc_napp_db/schema/image_repo/router
 
 references:
   - openai_external_access:
