@@ -22,7 +22,7 @@ services:
         FRONTEND_SERVICE: frontend:3000
         BACKEND_SERVICE: backend:8000
     ports:
-      - "8080:8000"
+      - "8000:8000"
     environment:
       - FRONTEND_SERVICE=frontend:3000
       - BACKEND_SERVICE=backend:8000
