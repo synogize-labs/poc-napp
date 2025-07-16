@@ -2,10 +2,6 @@ spec:
   containers:
     - name: frontend
       image: /poc_napp_db/schema/image_repo/frontend
-      env:
-        NODE_ENV: "production"
-        NEXT_PUBLIC_API_URL: "/api"
-        BACKEND_URL: "http://backend:8000"
     - name: backend
       image: /poc_napp_db/schema/image_repo/backend
       env:
@@ -13,8 +9,8 @@ spec:
     - name: router
       image: /poc_napp_db/schema/image_repo/router
       env:
-        FRONTEND_SERVICE: localhost:3000
-        BACKEND_SERVICE: backend:8000
+        FRONTEND_SERVICE: statefulset-0:3000
+        BACKEND_SERVICE: statefulset-0:8001
   endpoints:
     - name: routerendpoint
       port: 8000
