@@ -22,8 +22,7 @@ CREATE IMAGE REPOSITORY IF NOT EXISTS poc_napp_db.schema.image_repo;
 -- Tell us where to upload our docker image to. This will be used later.
 SHOW IMAGE REPOSITORIES;
 
-
--- Build and Package Applicaiton into Native App
+-- Build and Package Application into Native App
 USE ROLE ACCOUNTADMIN;
 
 -- Create the package.
