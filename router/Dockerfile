@@ -1,8 +1,5 @@
 FROM nginx:alpine
 
-ARG required FRONTEND_SERVICE
-ARG required BACKEND_SERVICE
-
 RUN apk update && apk add bash
 
 EXPOSE 8000
