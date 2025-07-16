@@ -58,7 +58,7 @@ BEGIN
        FOR APPLICATION poc_napp_consumer_app
        MIN_NODES = 1
        MAX_NODES = 1
-       INSTANCE_FAMILY = 'cpu_x64_xs'
+       INSTANCE_FAMILY = 'cpu_x64_s'
        AUTO_RESUME = TRUE;
    
    CREATE SERVICE IF NOT EXISTS poc_napp_app_service
