@@ -2,7 +2,7 @@ services:
   backend:
     build: ./backend
     expose:
-      - "8000"
+      - "8001"
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     env_file:
@@ -20,12 +20,12 @@ services:
       context: ./router
       args:
         FRONTEND_SERVICE: frontend:3000
-        BACKEND_SERVICE: backend:8000
+        BACKEND_SERVICE: backend:8001
     ports:
       - "8000:8000"
     environment:
       - FRONTEND_SERVICE=frontend:3000
-      - BACKEND_SERVICE=backend:8000
+      - BACKEND_SERVICE=backend:8001
     depends_on:
       - frontend
       - backend
