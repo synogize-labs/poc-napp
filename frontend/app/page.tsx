@@ -1,7 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import HealthCheck from "./components/HealthCheck";
+import { useState, useEffect } from "react";
+
+interface HealthStatus {
+  status: string;
+  service: string;
+}
 
 interface FeedbackResponse {
   original_text: string;
@@ -10,154 +14,196 @@ interface FeedbackResponse {
 }
 
 export default function Home() {
-  const [feedback, setFeedback] = useState("");
+  const [healthStatus, setHealthStatus] = useState<HealthStatus | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [feedbackText, setFeedbackText] = useState("");
   const [analysis, setAnalysis] = useState<FeedbackResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [analyzing, setAnalyzing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    checkHealth();
+  }, []);
+
+  const checkHealth = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await fetch("/api/health");
+      if (response.ok) {
+        const data = await response.json();
+        setHealthStatus(data);
+      } else {
+        setError("Backend is not responding");
+      }
+    } catch (err) {
+      setError("Cannot connect to backend");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const analyzeFeedback = async () => {
-    if (!feedback.trim()) {
-      setError("Please enter some feedback to analyze");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-    setAnalysis(null);
+    if (!feedbackText.trim()) return;
 
     try {
-      const response = await fetch("http://localhost:8000/analyze-feedback", {
+      setAnalyzing(true);
+      setError(null);
+      const response = await fetch("/api/analyze-feedback", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ text: feedback }),
+        body: JSON.stringify({ text: feedbackText }),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (response.ok) {
+        const data = await response.json();
+        setAnalysis(data);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.detail || "Failed to analyze feedback");
       }
-
-      const data = await response.json();
-      setAnalysis(data);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to analyze feedback"
-      );
+      setError("Failed to connect to backend");
     } finally {
-      setLoading(false);
+      setAnalyzing(false);
     }
   };
 
-  const getSentimentColor = (sentiment: string) => {
-    switch (sentiment.toLowerCase()) {
-      case "positive":
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "healthy":
         return "text-green-600 bg-green-100";
-      case "negative":
+      case "unhealthy":
         return "text-red-600 bg-red-100";
-      case "neutral":
-        return "text-gray-600 bg-gray-100";
       default:
-        return "text-gray-600 bg-gray-100";
+        return "text-yellow-600 bg-yellow-100";
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Snowflake Native App POC
           </h1>
-          <p className="text-xl text-gray-600">Feedback Analysis Tool</p>
+          <p className="text-gray-600">Feedback Analyzer Backend Monitor</p>
         </div>
 
-        {/* Main Content */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          {/* Input Section */}
-          <div className="mb-8">
-            <label
-              htmlFor="feedback"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Enter Customer Feedback
-            </label>
-            <textarea
-              id="feedback"
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-              placeholder="Enter customer feedback here..."
-              className="w-full h-32 px-3 py-2 border-2 border-blue-400 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white text-gray-900 placeholder-gray-500"
-            />
+        {/* Error Display */}
+        {error && (
+          <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 rounded text-sm">
+            {error}
+          </div>
+        )}
+
+        {/* Feedback Analyzer */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Feedback Analyzer
+          </h2>
+
+          <div className="space-y-4">
+            <div>
+              <label
+                htmlFor="feedback"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Enter customer feedback:
+              </label>
+              <textarea
+                id="feedback"
+                value={feedbackText}
+                onChange={(e) => setFeedbackText(e.target.value)}
+                placeholder="Enter customer feedback here..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white placeholder-gray-500"
+                rows={4}
+              />
+            </div>
+
             <button
               onClick={analyzeFeedback}
-              disabled={loading}
-              className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!feedbackText.trim() || analyzing}
+              className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Analyzing..." : "Analyze Feedback"}
+              {analyzing ? "Analyzing..." : "Analyze Feedback"}
             </button>
-          </div>
 
-          {/* Error Display */}
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-red-700">{error}</p>
-            </div>
-          )}
-
-          {/* Results Section */}
-          {analysis && (
-            <div className="border-t pt-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-                Analysis Results
-              </h2>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* Original Text */}
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    Original Feedback
-                  </h3>
-                  <div className="p-4 bg-gray-50 rounded-md">
-                    <p className="text-gray-700">{analysis.original_text}</p>
-                  </div>
-                </div>
-
-                {/* Sentiment */}
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    Sentiment
-                  </h3>
-                  <div
-                    className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getSentimentColor(
-                      analysis.sentiment
-                    )}`}
-                  >
-                    {analysis.sentiment.charAt(0).toUpperCase() +
-                      analysis.sentiment.slice(1)}
-                  </div>
-                </div>
-              </div>
-
-              {/* Summary */}
-              <div className="mt-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Summary
+            {analysis && (
+              <div className="mt-6 p-4 bg-gray-50 rounded-md">
+                <h3 className="font-semibold text-gray-900 mb-3">
+                  Analysis Results:
                 </h3>
-                <div className="p-4 bg-blue-50 rounded-md">
-                  <p className="text-gray-700">{analysis.summary}</p>
+                <div className="space-y-3">
+                  <div>
+                    <span className="font-medium text-gray-700">
+                      Original Text:
+                    </span>
+                    <p className="text-gray-600 mt-1">
+                      {analysis.original_text}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">
+                      Sentiment:
+                    </span>
+                    <span
+                      className={`ml-2 px-2 py-1 rounded text-sm font-medium ${
+                        analysis.sentiment === "positive"
+                          ? "bg-green-100 text-green-800"
+                          : analysis.sentiment === "negative"
+                          ? "bg-red-100 text-red-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
+                      {analysis.sentiment}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Summary:</span>
+                    <p className="text-gray-600 mt-1">{analysis.summary}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+        </div>
 
-          {/* API Status */}
-          <div className="mt-8 pt-6 border-t">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-500">Backend Status:</span>
-              <HealthCheck />
-            </div>
+        {/* Backend Status */}
+        <div className="mt-6 text-center">
+          <div className="inline-flex items-center space-x-2 text-xs text-gray-500">
+            {isLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-400"></div>
+                <span>Checking backend...</span>
+              </>
+            ) : healthStatus ? (
+              <>
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    healthStatus.status === "healthy"
+                      ? "bg-green-500"
+                      : "bg-red-500"
+                  }`}
+                ></span>
+                <span>Backend: {healthStatus.status}</span>
+              </>
+            ) : (
+              <>
+                <span className="w-2 h-2 rounded-full bg-gray-400"></span>
+                <span>Backend: unknown</span>
+              </>
+            )}
+            <button
+              onClick={checkHealth}
+              disabled={isLoading}
+              className="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+            >
+              ↻
+            </button>
           </div>
         </div>
       </div>

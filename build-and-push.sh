@@ -15,10 +15,18 @@ cd frontend/
 docker build --platform linux/amd64 -t frontend .
 docker tag frontend $IMAGE_REPO_URL/frontend
 docker push $IMAGE_REPO_URL/frontend
-cd ../..
+cd ..
 
 # Build and push backend
 cd backend
 docker build --platform linux/amd64 -t backend .
 docker tag backend $IMAGE_REPO_URL/backend
 docker push $IMAGE_REPO_URL/backend
+cd ..
+
+# Build and push router
+cd router
+docker build --platform linux/amd64 -t router .
+docker tag router $IMAGE_REPO_URL/router
+docker push $IMAGE_REPO_URL/router
+cd ..

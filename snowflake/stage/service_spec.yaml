@@ -2,13 +2,20 @@ spec:
   containers:
     - name: frontend
       image: /poc_napp_db/schema/image_repo/frontend
+      env:
+        NODE_ENV: "production"
+        NEXT_PUBLIC_API_URL: "/api"
+        BACKEND_URL: "http://backend:8000"
     - name: backend
       image: /poc_napp_db/schema/image_repo/backend
       env:
         OPENAI_API_KEY: sk-svcacct-pjE8GEmFWi_uwIVaOEoIqqesOEnPOzFb02HVgHAliGBawk9r1T3BlbkFJm-XLTn9j4gG4Y5EUHYTcEiCKrLYrvZJTXBVPRcdjNeNHxWxAA
+    - name: router
+      image: /poc_napp_db/schema/image_repo/router
+      env:
+        FRONTEND_SERVICE: localhost:3000
+        BACKEND_SERVICE: backend:8000
   endpoints:
-    - name: app
-      port: 3000
-      public: true
-    - name: api
+    - name: routerendpoint
       port: 8000
+      public: true

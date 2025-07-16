@@ -90,6 +90,15 @@ async def analyze_feedback(request: FeedbackRequest):
         print("Exception in /analyze-feedback:", traceback.format_exc(), flush=True)
         raise HTTPException(status_code=500, detail=f"Error analyzing feedback: {str(e)}")
 
+# Backward compatibility route - this will be handled by the router rewrite
+@app.post("/api/analyze-feedback", response_model=FeedbackResponse)
+async def analyze_feedback_api(request: FeedbackRequest):
+    return await analyze_feedback(request)
+
+@app.get("/api/health")
+async def health_check_api():
+    return await health_check()
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000) 
