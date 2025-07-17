@@ -28,14 +28,23 @@ artifacts:
       - /poc_napp_db/schema/image_repo/router
 
 references:
-  - openai_external_access:
+  - OPENAI_EXTERNAL_ACCESS:
       label: "OpenAI External Access Integration"
       description: "Required to access OpenAI API endpoints"
       privileges:
         - USAGE
       object_type: EXTERNAL ACCESS INTEGRATION
       required_at_setup: true
-      register_callback: core.register_openai_eai
+      register_callback: core.register_reference
+      configuration_callback: core.get_config_for_ref
+  - OPENAI_SECRET:
+      label: "OpenAI API Key"
+      description: "Required to authenticate with OpenAI API"
+      privileges:
+        - READ
+      object_type: SECRET
+      required_at_setup: true
+      register_callback: core.register_reference
       configuration_callback: core.get_config_for_ref
 
 configuration:

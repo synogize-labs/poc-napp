@@ -2,7 +2,7 @@ CREATE APPLICATION ROLE IF NOT EXISTS app_user;
 CREATE SCHEMA IF NOT EXISTS core;
 GRANT USAGE ON SCHEMA core TO APPLICATION ROLE app_user;
 
--- Configuration callback function for external access integration
+-- Configuration callback function for reference
 CREATE OR REPLACE PROCEDURE core.get_config_for_ref(ref_name STRING)
   RETURNS STRING
   LANGUAGE SQL
@@ -14,17 +14,25 @@ BEGIN
       RETURN '{
         "type": "CONFIGURATION",
         "payload": {
-          "host_ports": ["api.openai.com"],
-          "allowed_secrets": "NONE"
+          "host_ports": ["api.openai.com:80", "api.openai.com:443"],
+          "allowed_secrets": "LIST",
+          "secret_references": ["OPENAI_SECRET"]
         }
       }';
-    END CASE;
-    RETURN '';
-  END;
+    WHEN 'OPENAI_SECRET' THEN 
+      RETURN '{
+        "type": "CONFIGURATION",
+        "payload": {
+          "type": "GENERIC_STRING"
+        }
+      }';
+  END CASE;
+  RETURN '';
+END;
 $$;
 
--- Register callback for external access integration
-CREATE OR REPLACE PROCEDURE core.register_openai_eai(ref_name STRING, operation STRING, ref_or_alias STRING)
+-- Register reference callback
+CREATE OR REPLACE PROCEDURE core.register_reference(ref_name STRING, operation STRING, ref_or_alias STRING)
   RETURNS STRING
   LANGUAGE SQL
   AS $$
@@ -61,9 +69,21 @@ BEGIN
        INSTANCE_FAMILY = 'cpu_x64_s'
        AUTO_RESUME = TRUE;
    
+  --  -- (a) Allow egress only to api.openai.com
+  --  CREATE OR REPLACE NETWORK RULE openai_rule
+  --    MODE = EGRESS
+  --    TYPE = HOST_PORT
+  --    VALUE_LIST = ('api.openai.com');
+
+  --  -- (b) External Access Integration that will later be bound to the secret
+  --  CREATE OR REPLACE EXTERNAL ACCESS INTEGRATION openai_eai
+  --    ALLOWED_NETWORK_RULES = (openai_rule)
+  --    ENABLED = TRUE;
+   
    CREATE SERVICE IF NOT EXISTS poc_napp_app_service
     IN COMPUTE POOL poc_napp_app_pool
     FROM SPECIFICATION_FILE = 'service_spec.yaml';
+    -- EXTERNAL_ACCESS_INTEGRATIONS = (POC_NAPP_CONSUMER_APP_OPENAI_EXTERNAL_ACCESS_EXTERNAL_ACCESS);  
    
    GRANT SERVICE ROLE poc_napp_app_service!ALL_ENDPOINTS_USAGE TO APPLICATION ROLE app_user;
    GRANT USAGE ON WAREHOUSE poc_napp_app_wh TO APPLICATION ROLE app_user;
@@ -73,4 +93,4 @@ $$;
 
 GRANT USAGE ON PROCEDURE core.start_app(ARRAY) TO APPLICATION ROLE app_user;
 GRANT USAGE ON PROCEDURE core.get_config_for_ref(STRING) TO APPLICATION ROLE app_user;
-GRANT USAGE ON PROCEDURE core.register_openai_eai(STRING, STRING, STRING) TO APPLICATION ROLE app_user;
+GRANT USAGE ON PROCEDURE core.register_reference(STRING, STRING, STRING) TO APPLICATION ROLE app_user;

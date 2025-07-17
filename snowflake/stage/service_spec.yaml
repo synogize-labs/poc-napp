@@ -4,8 +4,10 @@ spec:
       image: /poc_napp_db/schema/image_repo/frontend
     - name: backend
       image: /poc_napp_db/schema/image_repo/backend
-      env:
-        OPENAI_API_KEY: sk-svcacct-pjE8GEmFWi_uwIVaOEoIqqesOEnPOzFb02HVgHAliGBawk9r1T3BlbkFJm-XLTn9j4gG4Y5EUHYTcEiCKrLYrvZJTXBVPRcdjNeNHxWxAA
+      secrets:
+        - snowflakeSecret:
+            objectReference: OPENAI_SECRET
+          directoryPath: /run/secrets/openai # This is the path to the secret in the container
     - name: router
       image: /poc_napp_db/schema/image_repo/router
       env:
