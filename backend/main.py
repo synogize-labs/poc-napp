@@ -7,6 +7,9 @@ from dotenv import load_dotenv
 import logging
 import socket
 import http.client
+from snowflake.snowpark.session import Session
+from snowflake.snowpark.context import get_active_session
+from spcs_helpers.connection import connection, session
 
 logging.basicConfig(level=logging.INFO)
 
@@ -40,6 +43,79 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "service": "feedback-analyzer"}
+
+@app.get("/test-db-connection")
+async def test_db_connection():
+    """Test database connection using spcs_helpers - following Snowflake Labs pattern"""
+    try:
+        # Test using the session function from spcs_helpers
+        snowpark_session = session()
+        
+        # Simple test query to verify connection
+        result = snowpark_session.sql("SELECT CURRENT_USER(), CURRENT_ROLE()").collect()
+        
+        if result and len(result) > 0:
+            user, role = result[0]
+            
+            # Get available tables
+            tables_result = snowpark_session.sql("SHOW TABLES").collect()
+            tables = []
+            
+            for table_row in tables_result:
+                table_name = table_row[1]  # Table name is in the second column
+                schema_name = table_row[2]  # Schema name is in the third column
+                
+                # Get columns for this table
+                try:
+                    columns_result = snowpark_session.sql(f"DESCRIBE TABLE {schema_name}.{table_name}").collect()
+                    columns = []
+                    for col_row in columns_result:
+                        if col_row[0] and not col_row[0].startswith('#'):  # Skip comments
+                            columns.append({
+                                "name": col_row[0],
+                                "type": col_row[1],
+                                "nullable": col_row[2] if len(col_row) > 2 else "YES"
+                            })
+                    
+                    tables.append({
+                        "name": table_name,
+                        "schema": schema_name,
+                        "columns": columns
+                    })
+                except Exception as col_error:
+                    # If we can't get columns, just add the table without columns
+                    tables.append({
+                        "name": table_name,
+                        "schema": schema_name,
+                        "columns": [],
+                        "column_error": str(col_error)
+                    })
+            
+            return {
+                "connected": True,
+                "message": "Database connection successful",
+                "user": user,
+                "role": role,
+                "tables": tables
+            }
+        else:
+            return {
+                "connected": False,
+                "message": "Connection test returned no results",
+                "user": "",
+                "role": "",
+                "tables": []
+            }
+            
+    except Exception as e:
+        logging.error(f"Database connection test failed: {e}")
+        return {
+            "connected": False,
+            "message": f"Connection failed: {str(e)}",
+            "user": "",
+            "role": "",
+            "tables": []
+        }
 
 def get_openai_api_key():
     # Try file first (Snowflake Native App)
@@ -148,6 +224,110 @@ async def analyze_feedback_api(request: FeedbackRequest):
 @app.get("/api/health")
 async def health_check_api():
     return await health_check()
+
+@app.get("/api/test-db-connection")
+async def test_db_connection_api():
+    return await test_db_connection()
+
+@app.get("/test-consumers-table")
+async def test_consumers_table():
+    """Test connection to consumers table using spcs_helpers"""
+    try:
+        # Test using the session function from spcs_helpers
+        snowpark_session = session()
+        
+        # Get current session info
+        session_info = snowpark_session.sql("SELECT CURRENT_USER(), CURRENT_ROLE()").collect()[0]
+        
+        # Use the reference syntax to access the consumer's table
+        try:
+            # Test if we can access the reference
+            test_result = snowpark_session.sql("SELECT COUNT(*) FROM reference('CONSUMERS_TABLE') LIMIT 1").collect()
+            if test_result:
+                table_source = "consumer_reference"
+            else:
+                table_source = "no_data"
+        except Exception as ref_error:
+            logging.error(f"Error accessing CONSUMERS_TABLE reference: {ref_error}")
+            return {
+                "connected": False,
+                "message": f"Error accessing table reference: {str(ref_error)}",
+                "user": session_info[0],
+                "role": session_info[1],
+                "table_name": "reference('CONSUMERS_TABLE')",
+                "table_source": "reference_error",
+                "row_count": 0,
+                "columns": [],
+                "sample_data": [],
+                "error": str(ref_error)
+            }
+        
+        # Test if we can query the consumers table using reference syntax
+        try:
+            # Get row count using reference
+            count_result = snowpark_session.sql("SELECT COUNT(*) FROM reference('CONSUMERS_TABLE')").collect()
+            row_count = count_result[0][0] if count_result else 0
+            
+            # Get sample data (first 5 rows) using reference
+            sample_result = snowpark_session.sql("SELECT * FROM reference('CONSUMERS_TABLE') LIMIT 5").collect()
+            sample_data = []
+            if sample_result:
+                # Get column names from the first row
+                columns = list(sample_result[0].asDict().keys())
+                for row in sample_result:
+                    sample_data.append(row.asDict())
+            
+            # Get table structure using reference
+            desc_result = snowpark_session.sql("DESCRIBE TABLE reference('CONSUMERS_TABLE')").collect()
+            columns_info = []
+            for col_row in desc_result:
+                if col_row[0] and not col_row[0].startswith('#'):
+                    columns_info.append({
+                        "name": col_row[0],
+                        "type": col_row[1],
+                        "nullable": col_row[2] if len(col_row) > 2 else "YES"
+                    })
+            
+            return {
+                "connected": True,
+                "message": f"Successfully connected to consumers table",
+                "user": session_info[0],
+                "role": session_info[1],
+                "table_name": "reference('CONSUMERS_TABLE')",
+                "table_source": table_source,
+                "row_count": row_count,
+                "columns": columns_info,
+                "sample_data": sample_data
+            }
+            
+        except Exception as table_error:
+            return {
+                "connected": False,
+                "message": f"Could not access consumers table: {str(table_error)}",
+                "user": session_info[0],
+                "role": session_info[1],
+                "table_name": "reference('CONSUMERS_TABLE')",
+                "table_source": table_source,
+                "error": str(table_error)
+            }
+            
+    except Exception as e:
+        logging.error(f"Consumers table connection test failed: {e}")
+        return {
+            "connected": False,
+            "message": f"Connection failed: {str(e)}",
+            "user": "",
+            "role": "",
+            "table_name": "",
+            "table_source": "",
+            "row_count": 0,
+            "columns": [],
+            "sample_data": []
+        }
+
+@app.get("/api/test-consumers-table")
+async def test_consumers_table_api():
+    return await test_consumers_table()
 
 if __name__ == "__main__":
     import uvicorn

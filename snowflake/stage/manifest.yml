@@ -46,6 +46,14 @@ references:
       required_at_setup: true
       register_callback: core.register_reference
       configuration_callback: core.get_config_for_ref
+  - CONSUMERS_TABLE:
+      label: "Consumers Table"
+      description: "View created on Consumers table"
+      privileges:
+        - SELECT
+      object_type: VIEW
+      multi_valued: false
+      register_callback: core.register_reference
 
 configuration:
   grant_callback: core.start_app

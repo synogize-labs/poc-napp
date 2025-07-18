@@ -82,7 +82,8 @@ BEGIN
    
    CREATE SERVICE IF NOT EXISTS poc_napp_app_service
     IN COMPUTE POOL poc_napp_app_pool
-    FROM SPECIFICATION_FILE = 'service_spec.yaml';
+    FROM SPECIFICATION_FILE = 'service_spec.yaml'
+    QUERY_WAREHOUSE = poc_napp_app_wh;
     -- EXTERNAL_ACCESS_INTEGRATIONS = (POC_NAPP_CONSUMER_APP_OPENAI_EXTERNAL_ACCESS_EXTERNAL_ACCESS);  
    
    GRANT SERVICE ROLE poc_napp_app_service!ALL_ENDPOINTS_USAGE TO APPLICATION ROLE app_user;
