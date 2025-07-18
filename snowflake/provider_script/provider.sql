@@ -41,6 +41,9 @@ DROP APPLICATION IF EXISTS poc_napp_consumer_app CASCADE;
 DROP APPLICATION PACKAGE IF EXISTS poc_napp_provider_package CASCADE;
 
 
+-- Helper commands to check the status of the native app.
 ALTER APPLICATION poc_napp_consumer_app SET DEBUG_MODE = TRUE;
 
 DESC APPLICATION poc_napp_consumer_app;
+
+SHOW REFERENCES IN APPLICATION poc_napp_consumer_app;
