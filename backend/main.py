@@ -216,19 +216,6 @@ async def analyze_feedback(request: FeedbackRequest):
         print("Exception in /analyze-feedback:", traceback.format_exc(), flush=True)
         raise HTTPException(status_code=500, detail=f"Error analyzing feedback: {str(e)}")
 
-# Backward compatibility route - this will be handled by the router rewrite
-@app.post("/api/analyze-feedback", response_model=FeedbackResponse)
-async def analyze_feedback_api(request: FeedbackRequest):
-    return await analyze_feedback(request)
-
-@app.get("/api/health")
-async def health_check_api():
-    return await health_check()
-
-@app.get("/api/test-db-connection")
-async def test_db_connection_api():
-    return await test_db_connection()
-
 @app.get("/test-consumers-table")
 async def test_consumers_table():
     """Test connection to consumers table using spcs_helpers"""
@@ -324,10 +311,6 @@ async def test_consumers_table():
             "columns": [],
             "sample_data": []
         }
-
-@app.get("/api/test-consumers-table")
-async def test_consumers_table_api():
-    return await test_consumers_table()
 
 if __name__ == "__main__":
     import uvicorn
