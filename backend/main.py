@@ -6,9 +6,7 @@ from dotenv import load_dotenv
 import logging
 import socket
 import http.client
-from snowflake.snowpark.session import Session
-from snowflake.snowpark.context import get_active_session
-from spcs_helpers.connection import connection, session
+from spcs_helpers.connection import session
 
 logging.basicConfig(level=logging.INFO)
 
