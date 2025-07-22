@@ -1,0 +1,40 @@
+snow spcs service logs poc_napp_app_service --container-name backend --instance-id 0 --database  POC_NAPP_CONSUMER_APP --schema CORE
+
+NFO:     Started server process [1]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:     10.244.1.9:54478 - "GET /health HTTP/1.0" 200 OK
+INFO:snowflake.connector.connection:Snowflake Connector for Python Version: 3.6.0, Python Version: 3.11.13, Platform: Linux-5.15.180-14.2025053011g5f85d0d+snow+aws+5.15+amd64.x86_64-x86_64-with-glibc2.36
+INFO:snowflake.connector.connection:This connection is in OCSP Fail Open Mode. TLS Certificates would be checked for validity and revocation status. Any other Certificate Revocation related exceptions or OCSP Responder failures would be disregarded in favor of connectivity.
+INFO:snowflake.snowpark.session:Snowpark Session information: 
+"version" : 1.15.0,
+"python.version" : 3.11.13,
+"python.connector.version" : 3.6.0,
+"python.connector.session.id" : 432632096407946,
+"os.name" : Linux
+
+INFO:snowflake.connector.cursor:query: [SELECT CURRENT_USER(), CURRENT_ROLE()]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 1
+INFO:snowflake.connector.cursor:query: [SHOW TABLES]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 0
+INFO:snowflake.connector.cursor:query: [SHOW TABLES]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 0
+INFO:snowflake.connector.cursor:query: [SHOW TABLES]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 0
+INFO:     10.244.1.9:54480 - "GET /test-db-connection HTTP/1.0" 200 OK
+INFO:root:Secret file found at /run/secrets/openai/secret_string
+INFO:root:Secret file read successfully. Key length: 164. Starts with: sk-pr...
+INFO:root:DEBUG: After secret file check, before marker
+INFO:root:MARKER: About to check DNS for api.openai.com
+INFO:root:api.openai.com resolves to 162.159.140.245
+INFO:root:DEBUG: After DNS check, before HTTPS check
+INFO:root:HTTPS connection to api.openai.com succeeded. Status: 421
+INFO:root:MARKER: Finished DNS check
+INFO:httpx:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:     10.244.1.9:48378 - "POST /analyze-feedback HTTP/1.0" 200 OK
+
