@@ -1,5 +1,4 @@
 from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import openai
 import os
@@ -16,18 +15,6 @@ logging.basicConfig(level=logging.INFO)
 load_dotenv()
 
 app = FastAPI(title="Snowflake Native App POC", version="1.0.0")
-
-# Configure CORS for frontend
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # In production, specify your frontend URL
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# OpenAI will be configured per request
-
 class FeedbackRequest(BaseModel):
     text: str
 
