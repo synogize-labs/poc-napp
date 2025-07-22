@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import logging
 from spcs_helpers.connection import session
 
+# Log messages at INFO level and above (for debugging)
 logging.basicConfig(level=logging.INFO)
 
 load_dotenv()
@@ -29,9 +30,7 @@ async def health_check():
 
 @app.get("/test-db-connection")
 async def test_db_connection():
-    """Test database connection using spcs_helpers - following Snowflake Labs pattern"""
     try:
-        # Test using the session function from spcs_helpers
         snowpark_session = session()
         
         # Simple test query to verify connection
@@ -165,9 +164,7 @@ async def analyze_feedback(request: FeedbackRequest):
 
 @app.get("/test-consumers-table")
 async def test_consumers_table():
-    """Test connection to consumers table using spcs_helpers"""
     try:
-        # Test using the session function from spcs_helpers
         snowpark_session = session()
         
         # Get current session info
@@ -196,7 +193,6 @@ async def test_consumers_table():
                 "error": str(ref_error)
             }
         
-        # Test if we can query the consumers table using reference syntax
         try:
             # Get row count using reference
             count_result = snowpark_session.sql("SELECT COUNT(*) FROM reference('CONSUMERS_TABLE')").collect()
