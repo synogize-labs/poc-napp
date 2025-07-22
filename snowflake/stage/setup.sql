@@ -14,7 +14,7 @@ BEGIN
       RETURN '{
         "type": "CONFIGURATION",
         "payload": {
-          "host_ports": ["api.openai.com:80", "api.openai.com:443"],
+          "host_ports": ["api.openai.com"],
           "allowed_secrets": "LIST",
           "secret_references": ["OPENAI_SECRET"]
         }
