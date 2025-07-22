@@ -20,7 +20,7 @@ artifacts:
   setup_script: setup.sql
   default_web_endpoint:
     service: core.poc_napp_app_service
-    endpoint: routerendpoint
+    endpoint: routerendpoint # needs to match the name in the specification yaml file
   container_services:
     images:
       - /poc_napp_db/schema/image_repo/frontend

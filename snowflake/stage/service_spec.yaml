@@ -11,8 +11,8 @@ spec:
     - name: router
       image: /poc_napp_db/schema/image_repo/router
       env:
-        FRONTEND_SERVICE: statefulset-0:3000
-        BACKEND_SERVICE: statefulset-0:8001
+        FRONTEND_SERVICE: statefulset-0:3000 # somehow localhost not working
+        BACKEND_SERVICE: statefulset-0:8001 # somehow localhost not working
   endpoints:
     - name: routerendpoint
       port: 8000
