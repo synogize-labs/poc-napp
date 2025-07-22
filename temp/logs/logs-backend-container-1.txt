@@ -1,3 +1,5 @@
+snow spcs service logs poc_napp_app_service --container-name backend --instance-id 0 --database  POC_NAPP_CONSUMER_APP --schema CORE
+
 INFO:     Started server process [1]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
