@@ -1,9 +1,0 @@
-snow spcs service logs poc_napp_app_service --container-name frontend --instance-id 0 --database  POC_NAPP_CONSUMER_APP --schema CORE
-
-   ▲ Next.js 15.4.1
-   - Local:        http://statefulset-0:3000
-   - Network:      http://statefulset-0:3000
-
- ✓ Starting...
- ✓ Ready in 112ms
-
