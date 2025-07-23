@@ -1,0 +1,61 @@
+INFO:     Started server process [1]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:snowflake.connector.connection:Snowflake Connector for Python Version: 3.6.0, Python Version: 3.11.13, Platform: Linux-5.15.180-14.2025053011g5f85d0d+snow+aws+5.15+amd64.x86_64-x86_64-with-glibc2.36
+INFO:snowflake.connector.connection:This connection is in OCSP Fail Open Mode. TLS Certificates would be checked for validity and revocation status. Any other Certificate Revocation related exceptions or OCSP Responder failures would be disregarded in favor of connectivity.
+INFO:snowflake.snowpark.session:Snowpark Session information: 
+"version" : 1.15.0,
+"python.version" : 3.11.13,
+"python.connector.version" : 3.6.0,
+"python.connector.session.id" : 432632096440938,
+"os.name" : Linux
+
+INFO:snowflake.connector.cursor:query: [SELECT CURRENT_USER(), CURRENT_ROLE()]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 1
+INFO:snowflake.connector.cursor:query: [SHOW TABLES]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 0
+INFO:snowflake.connector.cursor:query: [SHOW TABLES]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 0
+INFO:snowflake.connector.cursor:query: [SHOW TABLES]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 0
+INFO:     103.44.33.161:0 - "GET /test-db-connection HTTP/1.0" 200 OK
+INFO:     103.44.33.161:0 - "GET /health HTTP/1.0" 200 OK
+INFO:snowflake.connector.connection:Snowflake Connector for Python Version: 3.6.0, Python Version: 3.11.13, Platform: Linux-5.15.180-14.2025053011g5f85d0d+snow+aws+5.15+amd64.x86_64-x86_64-with-glibc2.36
+INFO:snowflake.connector.connection:This connection is in OCSP Fail Open Mode. TLS Certificates would be checked for validity and revocation status. Any other Certificate Revocation related exceptions or OCSP Responder failures would be disregarded in favor of connectivity.
+INFO:snowflake.snowpark.session:Snowpark Session information: 
+"version" : 1.15.0,
+"python.version" : 3.11.13,
+"python.connector.version" : 3.6.0,
+"python.connector.session.id" : 432632096401390,
+"os.name" : Linux
+
+INFO:snowflake.connector.cursor:query: [SELECT CURRENT_USER(), CURRENT_ROLE()]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 1
+INFO:snowflake.connector.cursor:query: [SELECT COUNT(*) FROM reference('CONSUMERS_TABLE') LIMIT 1]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 1
+INFO:snowflake.connector.cursor:query: [SELECT COUNT(*) FROM reference('CONSUMERS_TABLE')]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 1
+INFO:snowflake.connector.cursor:query: [SELECT * FROM reference('CONSUMERS_TABLE') LIMIT 5]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 5
+INFO:snowflake.connector.cursor:query: [DESCRIBE TABLE reference('CONSUMERS_TABLE')]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 9
+INFO:snowflake.connector.cursor:query: [DESCRIBE TABLE reference('CONSUMERS_TABLE')]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 9
+INFO:snowflake.connector.cursor:query: [DESCRIBE TABLE reference('CONSUMERS_TABLE')]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 9
+INFO:     103.44.33.161:0 - "GET /test-consumers-table HTTP/1.0" 200 OK
+INFO:httpx:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:     103.44.33.161:0 - "POST /analyze-feedback HTTP/1.0" 200 OK
+
