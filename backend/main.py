@@ -39,13 +39,18 @@ async def test_db_connection():
         if result and len(result) > 0:
             user, role = result[0]
             
-            # Get available tables
+            # Get available tables from current schema
             tables_result = snowpark_session.sql("SHOW TABLES").collect()
             tables = []
             
             for table_row in tables_result:
                 table_name = table_row[1]  # Table name is in the second column
                 schema_name = table_row[2]  # Schema name is in the third column
+                
+                # Skip tables that might cause permission issues
+                if table_name.upper() == "FEEDBACK_HISTORY" and schema_name.upper() != "CORE":
+                    # Skip feedback_history tables that aren't in the core schema
+                    continue
                 
                 # Get columns for this table
                 try:
@@ -72,6 +77,38 @@ async def test_db_connection():
                         "columns": [],
                         "column_error": str(col_error)
                     })
+            
+            # Also check for feedback history table in core schema
+            try:
+                feedback_history_check = snowpark_session.sql("SELECT COUNT(*) FROM core.feedback_history").collect()
+                if feedback_history_check:
+                    # Get columns for feedback history table
+                    try:
+                        columns_result = snowpark_session.sql("DESCRIBE TABLE core.feedback_history").collect()
+                        columns = []
+                        for col_row in columns_result:
+                            if col_row[0] and not col_row[0].startswith('#'):  # Skip comments
+                                columns.append({
+                                    "name": col_row[0],
+                                    "type": col_row[1],
+                                    "nullable": col_row[2] if len(col_row) > 2 else "YES"
+                                })
+                        
+                        tables.append({
+                            "name": "feedback_history",
+                            "schema": "core",
+                            "columns": columns
+                        })
+                    except Exception as col_error:
+                        tables.append({
+                            "name": "feedback_history",
+                            "schema": "core",
+                            "columns": [],
+                            "column_error": str(col_error)
+                        })
+            except Exception as feedback_error:
+                # Feedback history table doesn't exist or not accessible
+                pass
             
             return {
                 "connected": True,
@@ -150,6 +187,17 @@ async def analyze_feedback(request: FeedbackRequest):
             else:
                 sentiment = "neutral"
             summary = analysis_text
+        
+        # Store the feedback and analysis result
+        try:
+            snowpark_session = session()
+            snowpark_session.sql(f"""
+                INSERT INTO core.feedback_history (customer_feedback, sentiment, summary)
+                VALUES ('{request.text.replace("'", "''")}', '{sentiment}', '{summary.replace("'", "''")}')
+            """).collect()
+        except Exception as store_error:
+            logging.warning(f"Failed to store feedback history: {store_error}")
+            # Continue with the response even if storing fails
         
         return FeedbackResponse(
             original_text=request.text,
@@ -253,6 +301,60 @@ async def test_consumers_table():
             "row_count": 0,
             "columns": [],
             "sample_data": []
+        }
+
+@app.get("/test-feedback-history-table")
+async def test_feedback_history_table():
+    try:
+        snowpark_session = session()
+        
+        # Check if table exists and get row count
+        count_result = snowpark_session.sql("SELECT COUNT(*) FROM core.feedback_history").collect()
+        row_count = count_result[0][0] if count_result else 0
+        
+        # Get sample data
+        sample_result = snowpark_session.sql("""
+            SELECT id, customer_feedback, sentiment, summary, created_at
+            FROM core.feedback_history
+            ORDER BY created_at DESC
+            LIMIT 5
+        """).collect()
+        
+        sample_data = []
+        for row in sample_result:
+            sample_data.append({
+                "id": row[0],
+                "customer_feedback": row[1],
+                "sentiment": row[2],
+                "summary": row[3],
+                "created_at": str(row[4])
+            })
+        
+        # Get table structure
+        desc_result = snowpark_session.sql("DESCRIBE TABLE core.feedback_history").collect()
+        columns_info = []
+        for col_row in desc_result:
+            if col_row[0] and not col_row[0].startswith('#'):
+                columns_info.append({
+                    "name": col_row[0],
+                    "type": col_row[1],
+                    "nullable": col_row[2] if len(col_row) > 2 else "YES"
+                })
+        
+        return {
+            "connected": True,
+            "message": "Feedback history table is accessible",
+            "row_count": row_count,
+            "columns": columns_info,
+            "sample_data": sample_data
+        }
+        
+    except Exception as e:
+        logging.error(f"Feedback history table test failed: {e}")
+        return {
+            "connected": False,
+            "message": f"Error accessing feedback history table: {str(e)}",
+            "error": str(e)
         }
 
 if __name__ == "__main__":

@@ -47,6 +47,27 @@ interface FeedbackResponse {
   summary: string;
 }
 
+interface FeedbackHistoryItem {
+  id: number;
+  customer_feedback: string;
+  sentiment: string;
+  summary: string;
+  created_at: string;
+}
+
+interface FeedbackHistoryTableStatus {
+  connected: boolean;
+  message: string;
+  row_count: number;
+  columns: Array<{
+    name: string;
+    type: string;
+    nullable: string;
+  }>;
+  sample_data: FeedbackHistoryItem[];
+  error?: string;
+}
+
 export default function Home() {
   const [healthStatus, setHealthStatus] = useState<HealthStatus | null>(null);
   const [dbStatus, setDbStatus] = useState<DatabaseStatus | null>(null);
@@ -57,10 +78,14 @@ export default function Home() {
   const [analysis, setAnalysis] = useState<FeedbackResponse | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [feedbackHistoryStatus, setFeedbackHistoryStatus] =
+    useState<FeedbackHistoryTableStatus | null>(null);
 
   useEffect(() => {
     checkHealth();
     checkDatabaseStatus();
+    checkConsumersTableStatus();
+    checkFeedbackHistoryTableStatus();
   }, []);
 
   const checkHealth = async () => {
@@ -158,6 +183,8 @@ export default function Home() {
       if (response.ok) {
         const data = await response.json();
         setAnalysis(data);
+        setFeedbackText("");
+        checkFeedbackHistoryTableStatus();
       } else {
         const errorData = await response.json();
         setError(errorData.detail || "Failed to analyze feedback");
@@ -166,6 +193,32 @@ export default function Home() {
       setError("Failed to connect to backend");
     } finally {
       setAnalyzing(false);
+    }
+  };
+
+  const checkFeedbackHistoryTableStatus = async () => {
+    try {
+      const response = await fetch("/api/test-feedback-history-table");
+      if (response.ok) {
+        const data = await response.json();
+        setFeedbackHistoryStatus(data);
+      } else {
+        setFeedbackHistoryStatus({
+          connected: false,
+          message: "Failed to get feedback history table status",
+          row_count: 0,
+          columns: [],
+          sample_data: [],
+        });
+      }
+    } catch {
+      setFeedbackHistoryStatus({
+        connected: false,
+        message: "Cannot connect to feedback history table",
+        row_count: 0,
+        columns: [],
+        sample_data: [],
+      });
     }
   };
 
@@ -507,6 +560,114 @@ export default function Home() {
                     <span className="font-medium text-gray-700">Summary:</span>
                     <p className="text-gray-600 mt-1">{analysis.summary}</p>
                   </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Feedback History */}
+        <div className="bg-white rounded-lg shadow-md p-6 mt-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Feedback History
+          </h2>
+
+          <div className="space-y-4">
+            {/* Feedback History Table Status */}
+            {feedbackHistoryStatus && (
+              <div className="p-3 bg-blue-50 rounded-md">
+                <div className="text-sm text-gray-700 space-y-1">
+                  <div>
+                    <strong>Message:</strong> {feedbackHistoryStatus.message}
+                  </div>
+                  {feedbackHistoryStatus.row_count > 0 && (
+                    <div>
+                      <strong>Row Count:</strong>{" "}
+                      {feedbackHistoryStatus.row_count.toLocaleString()}
+                    </div>
+                  )}
+                  {feedbackHistoryStatus.columns &&
+                    feedbackHistoryStatus.columns.length > 0 && (
+                      <div className="mt-2">
+                        <strong>Columns:</strong>
+                        <div className="grid grid-cols-3 gap-2 mt-1">
+                          {feedbackHistoryStatus.columns.map((col, index) => (
+                            <div
+                              key={index}
+                              className="bg-white p-1 rounded border"
+                            >
+                              <div className="font-mono text-xs">
+                                {col.name}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {col.type}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  {feedbackHistoryStatus.sample_data &&
+                    feedbackHistoryStatus.sample_data.length > 0 && (
+                      <div className="mt-2">
+                        <strong>Sample Data (first 5 rows):</strong>
+                        <div className="mt-1 overflow-x-auto">
+                          <table className="min-w-full text-xs border border-gray-300">
+                            <thead className="bg-gray-100">
+                              <tr>
+                                <th className="border border-gray-300 px-2 py-1 text-left">
+                                  ID
+                                </th>
+                                <th className="border border-gray-300 px-2 py-1 text-left">
+                                  Feedback
+                                </th>
+                                <th className="border border-gray-300 px-2 py-1 text-left">
+                                  Sentiment
+                                </th>
+                                <th className="border border-gray-300 px-2 py-1 text-left">
+                                  Summary
+                                </th>
+                                <th className="border border-gray-300 px-2 py-1 text-left">
+                                  Timestamp
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {feedbackHistoryStatus.sample_data.map(
+                                (row, index) => (
+                                  <tr key={index}>
+                                    <td className="border border-gray-300 px-2 py-1">
+                                      {row.id}
+                                    </td>
+                                    <td className="border border-gray-300 px-2 py-1">
+                                      {row.customer_feedback}
+                                    </td>
+                                    <td className="border border-gray-300 px-2 py-1">
+                                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                                        {row.sentiment}
+                                      </span>
+                                    </td>
+                                    <td className="border border-gray-300 px-2 py-1">
+                                      {row.summary}
+                                    </td>
+                                    <td className="border border-gray-300 px-2 py-1">
+                                      {new Date(
+                                        row.created_at
+                                      ).toLocaleString()}
+                                    </td>
+                                  </tr>
+                                )
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  {feedbackHistoryStatus.error && (
+                    <div className="text-red-600 mt-1">
+                      <strong>Error:</strong> {feedbackHistoryStatus.error}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

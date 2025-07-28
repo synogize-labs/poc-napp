@@ -2,6 +2,18 @@ CREATE APPLICATION ROLE IF NOT EXISTS app_user;
 CREATE SCHEMA IF NOT EXISTS core;
 GRANT USAGE ON SCHEMA core TO APPLICATION ROLE app_user;
 
+-- Create feedback history table for storing customer feedback and analysis results
+CREATE TABLE IF NOT EXISTS core.feedback_history (
+    id NUMBER AUTOINCREMENT,
+    customer_feedback STRING,
+    sentiment STRING,
+    summary STRING,
+    created_at TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP()
+);
+
+-- Grant permissions on feedback history table
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE core.feedback_history TO APPLICATION ROLE app_user;
+
 -- Configuration callback function for reference
 CREATE OR REPLACE PROCEDURE core.get_config_for_ref(ref_name STRING)
   RETURNS STRING
