@@ -79,6 +79,9 @@ BEGIN
         ELSE
             RETURN 'unknown operation: ' || operation;
     END CASE;
+      RETURN NULL;
+    END;
+  $$;
 
 -- When you click the activate button --
 CREATE OR REPLACE PROCEDURE core.start_app(privileges ARRAY)
