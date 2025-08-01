@@ -210,8 +210,8 @@ async def analyze_feedback(request: FeedbackRequest):
         print("Exception in /analyze-feedback:", traceback.format_exc(), flush=True)
         raise HTTPException(status_code=500, detail=f"Error analyzing feedback: {str(e)}")
 
-@app.get("/test-consumers-table")
-async def test_consumers_table():
+@app.get("/test-consumer-table")
+async def test_consumer_table():
     try:
         snowpark_session = session()
         
@@ -221,19 +221,19 @@ async def test_consumers_table():
         # Use the reference syntax to access the consumer's table
         try:
             # Test if we can access the reference
-            test_result = snowpark_session.sql("SELECT COUNT(*) FROM reference('CONSUMERS_TABLE') LIMIT 1").collect()
+            test_result = snowpark_session.sql("SELECT COUNT(*) FROM reference('CONSUMER_TABLE') LIMIT 1").collect()
             if test_result:
                 table_source = "consumer_reference"
             else:
                 table_source = "no_data"
         except Exception as ref_error:
-            logging.error(f"Error accessing CONSUMERS_TABLE reference: {ref_error}")
+            logging.error(f"Error accessing CONSUMER_TABLE reference: {ref_error}")
             return {
                 "connected": False,
                 "message": f"Error accessing table reference: {str(ref_error)}",
                 "user": session_info[0],
                 "role": session_info[1],
-                "table_name": "reference('CONSUMERS_TABLE')",
+                "table_name": "reference('CONSUMER_TABLE')",
                 "table_source": "reference_error",
                 "row_count": 0,
                 "columns": [],
@@ -243,11 +243,11 @@ async def test_consumers_table():
         
         try:
             # Get row count using reference
-            count_result = snowpark_session.sql("SELECT COUNT(*) FROM reference('CONSUMERS_TABLE')").collect()
+            count_result = snowpark_session.sql("SELECT COUNT(*) FROM reference('CONSUMER_TABLE')").collect()
             row_count = count_result[0][0] if count_result else 0
             
             # Get sample data (first 5 rows) using reference
-            sample_result = snowpark_session.sql("SELECT * FROM reference('CONSUMERS_TABLE') LIMIT 5").collect()
+            sample_result = snowpark_session.sql("SELECT * FROM reference('CONSUMER_TABLE') LIMIT 5").collect()
             sample_data = []
             if sample_result:
                 # Get column names from the first row
@@ -256,7 +256,7 @@ async def test_consumers_table():
                     sample_data.append(row.asDict())
             
             # Get table structure using reference
-            desc_result = snowpark_session.sql("DESCRIBE TABLE reference('CONSUMERS_TABLE')").collect()
+            desc_result = snowpark_session.sql("DESCRIBE TABLE reference('CONSUMER_TABLE')").collect()
             columns_info = []
             for col_row in desc_result:
                 if col_row[0] and not col_row[0].startswith('#'):
@@ -268,10 +268,10 @@ async def test_consumers_table():
             
             return {
                 "connected": True,
-                "message": f"Successfully connected to consumers table",
+                "message": f"Successfully connected to consumer table",
                 "user": session_info[0],
                 "role": session_info[1],
-                "table_name": "reference('CONSUMERS_TABLE')",
+                "table_name": "reference('CONSUMER_TABLE')",
                 "table_source": table_source,
                 "row_count": row_count,
                 "columns": columns_info,
@@ -281,16 +281,16 @@ async def test_consumers_table():
         except Exception as table_error:
             return {
                 "connected": False,
-                "message": f"Could not access consumers table: {str(table_error)}",
+                "message": f"Could not access consumer table: {str(table_error)}",
                 "user": session_info[0],
                 "role": session_info[1],
-                "table_name": "reference('CONSUMERS_TABLE')",
+                "table_name": "reference('CONSUMER_TABLE')",
                 "table_source": table_source,
                 "error": str(table_error)
             }
             
     except Exception as e:
-        logging.error(f"Consumers table connection test failed: {e}")
+        logging.error(f"Consumer table connection test failed: {e}")
         return {
             "connected": False,
             "message": f"Connection failed: {str(e)}",
