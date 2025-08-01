@@ -63,6 +63,23 @@ CREATE OR REPLACE PROCEDURE core.register_reference(ref_name STRING, operation S
     END;
   $$;
 
+-- Register multi-valued reference callback
+CREATE OR REPLACE PROCEDURE core.register_multi_reference(ref_name STRING, operation STRING, ref_or_alias STRING)
+RETURNS STRING
+LANGUAGE SQL
+AS $$
+BEGIN
+    CASE (operation)
+        WHEN 'ADD' THEN
+            SELECT SYSTEM$ADD_REFERENCE(:ref_name, :ref_or_alias);
+        WHEN 'REMOVE' THEN
+            SELECT SYSTEM$REMOVE_REFERENCE(:ref_name, :ref_or_alias);
+        WHEN 'CLEAR' THEN
+            SELECT SYSTEM$REMOVE_ALL_REFERENCES(:ref_name);
+        ELSE
+            RETURN 'unknown operation: ' || operation;
+    END CASE;
+
 -- When you click the activate button --
 CREATE OR REPLACE PROCEDURE core.start_app(privileges ARRAY)
   RETURNS STRING
@@ -96,3 +113,4 @@ $$;
 GRANT USAGE ON PROCEDURE core.start_app(ARRAY) TO APPLICATION ROLE app_user;
 GRANT USAGE ON PROCEDURE core.get_config_for_ref(STRING) TO APPLICATION ROLE app_user;
 GRANT USAGE ON PROCEDURE core.register_reference(STRING, STRING, STRING) TO APPLICATION ROLE app_user;
+GRANT USAGE ON PROCEDURE core.register_multi_reference(STRING, STRING, STRING) TO APPLICATION ROLE app_user;

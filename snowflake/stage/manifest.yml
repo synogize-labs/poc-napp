@@ -52,8 +52,8 @@ references:
       privileges:
         - SELECT
       object_type: TABLE
-      multi_valued: false
-      register_callback: core.register_reference
+      multi_valued: true
+      register_callback: core.register_multi_reference
 
 configuration:
   grant_callback: core.start_app
