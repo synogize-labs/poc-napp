@@ -48,10 +48,10 @@ references:
       configuration_callback: core.get_config_for_ref
   - CONSUMER_TABLE:
       label: "Consumer Table"
-      description: "View created on Consumer table"
+      description: "Table created on Consumer account"
       privileges:
         - SELECT
-      object_type: VIEW
+      object_type: TABLE
       multi_valued: false
       register_callback: core.register_reference
 
