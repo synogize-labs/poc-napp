@@ -65,20 +65,20 @@ CREATE OR REPLACE PROCEDURE core.register_reference(ref_name STRING, operation S
 
 -- Register multi-valued reference callback
 CREATE OR REPLACE PROCEDURE core.register_multi_reference(ref_name STRING, operation STRING, ref_or_alias STRING)
-RETURNS STRING
-LANGUAGE SQL
-AS $$
-BEGIN
-    CASE (operation)
+  RETURNS STRING
+  LANGUAGE SQL
+  AS $$
+    BEGIN
+      CASE (operation)
         WHEN 'ADD' THEN
-            SELECT SYSTEM$ADD_REFERENCE(:ref_name, :ref_or_alias);
+          SELECT SYSTEM$ADD_REFERENCE(:ref_name, :ref_or_alias);
         WHEN 'REMOVE' THEN
-            SELECT SYSTEM$REMOVE_REFERENCE(:ref_name, :ref_or_alias);
+          SELECT SYSTEM$REMOVE_REFERENCE(:ref_name, :ref_or_alias);
         WHEN 'CLEAR' THEN
-            SELECT SYSTEM$REMOVE_ALL_REFERENCES(:ref_name);
-        ELSE
-            RETURN 'unknown operation: ' || operation;
-    END CASE;
+          SELECT SYSTEM$REMOVE_ALL_REFERENCES(:ref_name);
+      ELSE
+        RETURN 'unknown operation: ' || operation;
+      END CASE;
       RETURN NULL;
     END;
   $$;
