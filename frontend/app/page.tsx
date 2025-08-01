@@ -134,7 +134,7 @@ export default function Home() {
 
   const checkConsumersTableStatus = async () => {
     try {
-      const response = await fetch("/api/test-consumers-table");
+      const response = await fetch("/api/test-consumer-table");
       if (response.ok) {
         const data = await response.json();
         setConsumersTableStatus(data);

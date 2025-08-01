@@ -46,13 +46,13 @@ references:
       required_at_setup: true
       register_callback: core.register_reference
       configuration_callback: core.get_config_for_ref
-  - CONSUMERS_TABLE:
-      label: "Consumers Table"
-      description: "Tables created on Consumers account"
+  - CONSUMER_TABLE:
+      label: "Consumer Table"
+      description: "Table created on Consumer account"
       privileges:
         - SELECT
       object_type: TABLE
-      multi_valued: true
+      multi_valued: false
       register_callback: core.register_reference
 
 configuration:
