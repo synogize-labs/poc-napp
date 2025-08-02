@@ -4,7 +4,7 @@ import openai
 import os
 from dotenv import load_dotenv
 import logging
-from spcs_helpers.connection import session
+from spcs_helpers import session
 
 # Log messages at INFO level and above (for debugging)
 logging.basicConfig(level=logging.INFO)
@@ -210,6 +210,8 @@ async def analyze_feedback(request: FeedbackRequest):
         print("Exception in /analyze-feedback:", traceback.format_exc(), flush=True)
         raise HTTPException(status_code=500, detail=f"Error analyzing feedback: {str(e)}")
 
+
+
 @app.get("/test-consumer-table")
 async def test_consumer_table():
     try:
@@ -218,75 +220,119 @@ async def test_consumer_table():
         # Get current session info
         session_info = snowpark_session.sql("SELECT CURRENT_USER(), CURRENT_ROLE()").collect()[0]
         
-        # Use the reference syntax to access the consumer's table
-        try:
-            # Test if we can access the reference
-            test_result = snowpark_session.sql("SELECT COUNT(*) FROM reference('CONSUMER_TABLE') LIMIT 1").collect()
-            if test_result:
-                table_source = "consumer_reference"
-            else:
-                table_source = "no_data"
-        except Exception as ref_error:
-            logging.error(f"Error accessing CONSUMER_TABLE reference: {ref_error}")
-            return {
-                "connected": False,
-                "message": f"Error accessing table reference: {str(ref_error)}",
-                "user": session_info[0],
-                "role": session_info[1],
-                "table_name": "reference('CONSUMER_TABLE')",
-                "table_source": "reference_error",
-                "row_count": 0,
-                "columns": [],
-                "sample_data": [],
-                "error": str(ref_error)
-            }
+        # Check if this is a multi-valued reference
+        from spcs_helpers import get_reference_ids
         
-        try:
-            # Get row count using reference
-            count_result = snowpark_session.sql("SELECT COUNT(*) FROM reference('CONSUMER_TABLE')").collect()
-            row_count = count_result[0][0] if count_result else 0
+        reference_ids = get_reference_ids('CONSUMER_TABLE')
+        
+        if len(reference_ids) > 1:
+            # Multi-valued reference - use direct SQL queries like the working endpoint
+            tables_info = []
             
-            # Get sample data (first 5 rows) using reference
-            sample_result = snowpark_session.sql("SELECT * FROM reference('CONSUMER_TABLE') LIMIT 5").collect()
-            sample_data = []
-            if sample_result:
-                # Get column names from the first row
-                columns = list(sample_result[0].asDict().keys())
-                for row in sample_result:
-                    sample_data.append(row.asDict())
-            
-            # Get table structure using reference
-            desc_result = snowpark_session.sql("DESCRIBE TABLE reference('CONSUMER_TABLE')").collect()
-            columns_info = []
-            for col_row in desc_result:
-                if col_row[0] and not col_row[0].startswith('#'):
-                    columns_info.append({
-                        "name": col_row[0],
-                        "type": col_row[1],
-                        "nullable": col_row[2] if len(col_row) > 2 else "YES"
+            for ref_id in reference_ids:
+                try:
+                    # Get row count using direct SQL
+                    count_result = snowpark_session.sql(f"SELECT COUNT(*) FROM reference('CONSUMER_TABLE', '{ref_id}')").collect()
+                    row_count = count_result[0][0] if count_result else 0
+                    
+                    # Get sample data using direct SQL
+                    sample_result = snowpark_session.sql(f"SELECT * FROM reference('CONSUMER_TABLE', '{ref_id}') LIMIT 3").collect()
+                    
+                    sample_data = []
+                    columns = []
+                    
+                    if sample_result:
+                        # Get column names from the first row
+                        columns = list(sample_result[0].asDict().keys())
+                        for row in sample_result:
+                            sample_data.append(row.asDict())
+                    
+                    tables_info.append({
+                        "reference_id": ref_id,
+                        "row_count": row_count,
+                        "columns": columns,
+                        "sample_data": sample_data,
+                        "accessible": True
+                    })
+                    
+                except Exception as table_error:
+                    tables_info.append({
+                        "reference_id": ref_id,
+                        "row_count": 0,
+                        "columns": [],
+                        "sample_data": [],
+                        "accessible": False,
+                        "error": str(table_error)
                     })
             
             return {
                 "connected": True,
-                "message": f"Successfully connected to consumer table",
+                "message": f"Successfully connected to {len(reference_ids)} consumer tables",
                 "user": session_info[0],
                 "role": session_info[1],
-                "table_name": "reference('CONSUMER_TABLE')",
-                "table_source": table_source,
-                "row_count": row_count,
-                "columns": columns_info,
-                "sample_data": sample_data
+                "reference_type": "multi_valued",
+                "total_tables": len(reference_ids),
+                "tables_info": tables_info
             }
-            
-        except Exception as table_error:
+        elif len(reference_ids) == 1:
+            # Single table - use the same format as multi-table for consistency
+            ref_id = reference_ids[0]
+            try:
+                # Get row count using reference with specific ID
+                count_result = snowpark_session.sql(f"SELECT COUNT(*) FROM reference('CONSUMER_TABLE', '{ref_id}')").collect()
+                row_count = count_result[0][0] if count_result else 0
+                
+                # Get sample data (first 5 rows) using reference
+                sample_result = snowpark_session.sql(f"SELECT * FROM reference('CONSUMER_TABLE', '{ref_id}') LIMIT 5").collect()
+                sample_data = []
+                
+                # Get column names from sample data
+                columns = []
+                if sample_result:
+                    columns = list(sample_result[0].asDict().keys())
+                    for row in sample_result:
+                        sample_data.append(row.asDict())
+                
+                # Create tables_info array with single table (same format as multi-table)
+                tables_info = [{
+                    "reference_id": ref_id,
+                    "row_count": row_count,
+                    "columns": columns,
+                    "sample_data": sample_data,
+                    "accessible": True
+                }]
+                
+                return {
+                    "connected": True,
+                    "message": f"Successfully connected to consumer table",
+                    "user": session_info[0],
+                    "role": session_info[1],
+                    "reference_type": "single_valued",
+                    "reference_id": ref_id,
+                    "row_count": row_count,
+                    "total_tables": 1,
+                    "tables_info": tables_info
+                }
+                
+            except Exception as table_error:
+                return {
+                    "connected": False,
+                    "message": f"Could not access consumer table: {str(table_error)}",
+                    "user": session_info[0],
+                    "role": session_info[1],
+                    "reference_type": "single_valued",
+                    "reference_id": ref_id,
+                    "error": str(table_error)
+                }
+        else:
+            # No tables granted
             return {
                 "connected": False,
-                "message": f"Could not access consumer table: {str(table_error)}",
+                "message": "No consumer tables have been granted to this application",
                 "user": session_info[0],
                 "role": session_info[1],
-                "table_name": "reference('CONSUMER_TABLE')",
-                "table_source": table_source,
-                "error": str(table_error)
+                "reference_type": "none",
+                "total_tables": 0
             }
             
     except Exception as e:
@@ -296,11 +342,8 @@ async def test_consumer_table():
             "message": f"Connection failed: {str(e)}",
             "user": "",
             "role": "",
-            "table_name": "",
-            "table_source": "",
-            "row_count": 0,
-            "columns": [],
-            "sample_data": []
+            "reference_type": "error",
+            "error": str(e)
         }
 
 @app.get("/test-feedback-history-table")
@@ -354,6 +397,96 @@ async def test_feedback_history_table():
         return {
             "connected": False,
             "message": f"Error accessing feedback history table: {str(e)}",
+            "error": str(e)
+        }
+
+@app.get("/test-multi-consumer-tables")
+async def test_multi_consumer_tables():
+    try:
+        snowpark_session = session()
+        
+        # Get current session info
+        session_info = snowpark_session.sql("SELECT CURRENT_USER(), CURRENT_ROLE()").collect()[0]
+        
+        # Get all available reference IDs for CONSUMER_TABLE
+        try:
+            references_result = snowpark_session.sql("SELECT SYSTEM$GET_ALL_REFERENCES('CONSUMER_TABLE')").collect()
+            if references_result and references_result[0][0]:
+                import json
+                reference_ids = json.loads(references_result[0][0])
+            else:
+                reference_ids = []
+        except Exception as ref_error:
+            logging.error(f"Error getting references: {ref_error}")
+            return {
+                "connected": False,
+                "message": f"Error getting reference IDs: {str(ref_error)}",
+                "user": session_info[0],
+                "role": session_info[1],
+                "available_tables": [],
+                "error": str(ref_error)
+            }
+        
+        available_tables = []
+        
+        # Test each reference ID
+        for ref_id in reference_ids:
+            try:
+                # Test access to this specific table
+                test_query = f"SELECT COUNT(*) FROM reference('CONSUMER_TABLE', '{ref_id}')"
+                count_result = snowpark_session.sql(test_query).collect()
+                row_count = count_result[0][0] if count_result else 0
+                
+                # Get sample data from this table
+                sample_query = f"SELECT * FROM reference('CONSUMER_TABLE', '{ref_id}') LIMIT 3"
+                sample_result = snowpark_session.sql(sample_query).collect()
+                
+                sample_data = []
+                columns_info = []
+                
+                if sample_result:
+                    # Get column names from the first row
+                    columns = list(sample_result[0].asDict().keys())
+                    columns_info = columns
+                    
+                    for row in sample_result:
+                        sample_data.append(row.asDict())
+                
+                available_tables.append({
+                    "reference_id": ref_id,
+                    "row_count": row_count,
+                    "columns": columns_info,
+                    "sample_data": sample_data,
+                    "accessible": True
+                })
+                
+            except Exception as table_error:
+                available_tables.append({
+                    "reference_id": ref_id,
+                    "row_count": 0,
+                    "columns": [],
+                    "sample_data": [],
+                    "accessible": False,
+                    "error": str(table_error)
+                })
+        
+        return {
+            "connected": True,
+            "message": f"Successfully discovered {len(reference_ids)} consumer tables",
+            "user": session_info[0],
+            "role": session_info[1],
+            "total_references": len(reference_ids),
+            "available_tables": available_tables
+        }
+        
+    except Exception as e:
+        logging.error(f"Multi-consumer tables test failed: {e}")
+        return {
+            "connected": False,
+            "message": f"Connection failed: {str(e)}",
+            "user": "",
+            "role": "",
+            "available_tables": [],
             "error": str(e)
         }
 

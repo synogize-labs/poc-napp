@@ -29,15 +29,17 @@ interface ConsumersTableStatus {
   message: string;
   user: string;
   role: string;
-  table_name: string;
-  table_source: string;
-  row_count: number;
-  columns: Array<{
-    name: string;
-    type: string;
-    nullable: string;
+  reference_type?: "single_valued" | "multi_valued" | "none" | "error";
+  reference_id?: string;
+  total_tables?: number;
+  tables_info?: Array<{
+    reference_id: string;
+    row_count: number;
+    columns: string[];
+    sample_data: Array<Record<string, string | number | boolean | null>>;
+    accessible: boolean;
+    error?: string;
   }>;
-  sample_data: Array<Record<string, string | number | boolean | null>>;
   error?: string;
 }
 
@@ -144,11 +146,6 @@ export default function Home() {
           message: "Failed to get consumers table status",
           user: "",
           role: "",
-          table_name: "",
-          table_source: "",
-          row_count: 0,
-          columns: [],
-          sample_data: [],
         });
       }
     } catch {
@@ -157,11 +154,6 @@ export default function Home() {
         message: "Cannot connect to consumers table",
         user: "",
         role: "",
-        table_name: "",
-        table_source: "",
-        row_count: 0,
-        columns: [],
-        sample_data: [],
       });
     }
   };
@@ -319,7 +311,9 @@ export default function Home() {
               <div className="text-right">
                 <div className="text-sm text-gray-900">
                   {consumersTableStatus?.connected
-                    ? "Connected"
+                    ? consumersTableStatus.reference_type === "multi_valued"
+                      ? `Multi (${consumersTableStatus.total_tables || 0})`
+                      : "Connected"
                     : "Disconnected"}
                 </div>
                 <button
@@ -351,9 +345,7 @@ export default function Home() {
                 )}
                 {dbStatus.tables && dbStatus.tables.length > 0 && (
                   <div className="mt-3">
-                    <strong>
-                      Available Tables ({dbStatus.tables.length}):
-                    </strong>
+                    <strong>Database Tables ({dbStatus.tables.length}):</strong>
                     <div className="mt-2 space-y-2">
                       {dbStatus.tables.map((table, index) => (
                         <div
@@ -401,86 +393,91 @@ export default function Home() {
                       <div>
                         <strong>Message:</strong> {consumersTableStatus.message}
                       </div>
-                      {consumersTableStatus.table_name && (
-                        <div>
-                          <strong>Table:</strong>{" "}
-                          {consumersTableStatus.table_name}
-                          <span className="text-xs text-gray-500 ml-2">
-                            ({consumersTableStatus.table_source})
-                          </span>
-                        </div>
-                      )}
-                      {consumersTableStatus.row_count > 0 && (
-                        <div>
-                          <strong>Row Count:</strong>{" "}
-                          {consumersTableStatus.row_count.toLocaleString()}
-                        </div>
-                      )}
-                      {consumersTableStatus.columns &&
-                        consumersTableStatus.columns.length > 0 && (
-                          <div className="mt-2">
-                            <strong>Columns:</strong>
-                            <div className="grid grid-cols-3 gap-2 mt-1">
-                              {consumersTableStatus.columns.map(
-                                (col, index) => (
+
+                      {/* Tables info - works for both single and multi tables */}
+                      {consumersTableStatus.tables_info &&
+                        consumersTableStatus.tables_info.length > 0 && (
+                          <div className="mt-3">
+                            <strong>
+                              Consumer Tables (
+                              {consumersTableStatus.tables_info.length}):
+                            </strong>
+
+                            <div className="mt-2 space-y-2">
+                              {consumersTableStatus.tables_info.map(
+                                (table, index) => (
                                   <div
                                     key={index}
-                                    className="bg-white p-1 rounded border"
+                                    className="border-l-2 border-green-300 pl-3"
                                   >
-                                    <div className="font-mono text-xs">
-                                      {col.name}
+                                    <div className="font-medium text-green-800">
+                                      Table {index + 1} (ID:{" "}
+                                      {table.reference_id})
                                     </div>
-                                    <div className="text-xs text-gray-500">
-                                      {col.type}
+                                    <div className="text-xs text-gray-600">
+                                      <strong>Rows:</strong>{" "}
+                                      {table.row_count.toLocaleString()} |
+                                      <strong>Columns:</strong>{" "}
+                                      {table.columns.length} |
+                                      <strong>Status:</strong>{" "}
+                                      {table.accessible
+                                        ? "Accessible"
+                                        : "Error"}
                                     </div>
+                                    {table.error && (
+                                      <div className="text-xs text-red-600 mt-1">
+                                        Error: {table.error}
+                                      </div>
+                                    )}
+                                    {table.sample_data &&
+                                      table.sample_data.length > 0 && (
+                                        <div className="mt-1">
+                                          <strong>Sample Data:</strong>
+                                          <div className="mt-1 overflow-x-auto">
+                                            <table className="min-w-full text-xs border border-gray-300">
+                                              <thead className="bg-gray-100">
+                                                <tr>
+                                                  {Object.keys(
+                                                    table.sample_data[0]
+                                                  ).map((key) => (
+                                                    <th
+                                                      key={key}
+                                                      className="border border-gray-300 px-1 py-1 text-left"
+                                                    >
+                                                      {key}
+                                                    </th>
+                                                  ))}
+                                                </tr>
+                                              </thead>
+                                              <tbody>
+                                                {table.sample_data
+                                                  .slice(0, 3)
+                                                  .map((row, rowIndex) => (
+                                                    <tr key={rowIndex}>
+                                                      {Object.values(row).map(
+                                                        (value, colIndex) => (
+                                                          <td
+                                                            key={colIndex}
+                                                            className="border border-gray-300 px-1 py-1"
+                                                          >
+                                                            {String(value)}
+                                                          </td>
+                                                        )
+                                                      )}
+                                                    </tr>
+                                                  ))}
+                                              </tbody>
+                                            </table>
+                                          </div>
+                                        </div>
+                                      )}
                                   </div>
                                 )
                               )}
                             </div>
                           </div>
                         )}
-                      {consumersTableStatus.sample_data &&
-                        consumersTableStatus.sample_data.length > 0 && (
-                          <div className="mt-2">
-                            <strong>Sample Data (first 5 rows):</strong>
-                            <div className="mt-1 overflow-x-auto">
-                              <table className="min-w-full text-xs border border-gray-300">
-                                <thead className="bg-gray-100">
-                                  <tr>
-                                    {Object.keys(
-                                      consumersTableStatus.sample_data[0]
-                                    ).map((key) => (
-                                      <th
-                                        key={key}
-                                        className="border border-gray-300 px-2 py-1 text-left"
-                                      >
-                                        {key}
-                                      </th>
-                                    ))}
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {consumersTableStatus.sample_data.map(
-                                    (row, index) => (
-                                      <tr key={index}>
-                                        {Object.values(row).map(
-                                          (value, colIndex) => (
-                                            <td
-                                              key={colIndex}
-                                              className="border border-gray-300 px-2 py-1"
-                                            >
-                                              {String(value)}
-                                            </td>
-                                          )
-                                        )}
-                                      </tr>
-                                    )
-                                  )}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                        )}
+
                       {consumersTableStatus.error && (
                         <div className="text-red-600 mt-1">
                           <strong>Error:</strong> {consumersTableStatus.error}
