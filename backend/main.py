@@ -4,7 +4,7 @@ import openai
 import os
 from dotenv import load_dotenv
 import logging
-from spcs_helpers import session
+from spcs_helpers import session, get_reference_ids
 
 # Log messages at INFO level and above (for debugging)
 logging.basicConfig(level=logging.INFO)
@@ -210,8 +210,6 @@ async def analyze_feedback(request: FeedbackRequest):
         print("Exception in /analyze-feedback:", traceback.format_exc(), flush=True)
         raise HTTPException(status_code=500, detail=f"Error analyzing feedback: {str(e)}")
 
-
-
 @app.get("/test-consumer-table")
 async def test_consumer_table():
     try:
@@ -220,9 +218,7 @@ async def test_consumer_table():
         # Get current session info
         session_info = snowpark_session.sql("SELECT CURRENT_USER(), CURRENT_ROLE()").collect()[0]
         
-        # Check if this is a multi-valued reference
-        from spcs_helpers import get_reference_ids
-        
+        # Get all reference IDs using the helper function
         reference_ids = get_reference_ids('CONSUMER_TABLE')
         
         if len(reference_ids) > 1:
@@ -397,96 +393,6 @@ async def test_feedback_history_table():
         return {
             "connected": False,
             "message": f"Error accessing feedback history table: {str(e)}",
-            "error": str(e)
-        }
-
-@app.get("/test-multi-consumer-tables")
-async def test_multi_consumer_tables():
-    try:
-        snowpark_session = session()
-        
-        # Get current session info
-        session_info = snowpark_session.sql("SELECT CURRENT_USER(), CURRENT_ROLE()").collect()[0]
-        
-        # Get all available reference IDs for CONSUMER_TABLE
-        try:
-            references_result = snowpark_session.sql("SELECT SYSTEM$GET_ALL_REFERENCES('CONSUMER_TABLE')").collect()
-            if references_result and references_result[0][0]:
-                import json
-                reference_ids = json.loads(references_result[0][0])
-            else:
-                reference_ids = []
-        except Exception as ref_error:
-            logging.error(f"Error getting references: {ref_error}")
-            return {
-                "connected": False,
-                "message": f"Error getting reference IDs: {str(ref_error)}",
-                "user": session_info[0],
-                "role": session_info[1],
-                "available_tables": [],
-                "error": str(ref_error)
-            }
-        
-        available_tables = []
-        
-        # Test each reference ID
-        for ref_id in reference_ids:
-            try:
-                # Test access to this specific table
-                test_query = f"SELECT COUNT(*) FROM reference('CONSUMER_TABLE', '{ref_id}')"
-                count_result = snowpark_session.sql(test_query).collect()
-                row_count = count_result[0][0] if count_result else 0
-                
-                # Get sample data from this table
-                sample_query = f"SELECT * FROM reference('CONSUMER_TABLE', '{ref_id}') LIMIT 3"
-                sample_result = snowpark_session.sql(sample_query).collect()
-                
-                sample_data = []
-                columns_info = []
-                
-                if sample_result:
-                    # Get column names from the first row
-                    columns = list(sample_result[0].asDict().keys())
-                    columns_info = columns
-                    
-                    for row in sample_result:
-                        sample_data.append(row.asDict())
-                
-                available_tables.append({
-                    "reference_id": ref_id,
-                    "row_count": row_count,
-                    "columns": columns_info,
-                    "sample_data": sample_data,
-                    "accessible": True
-                })
-                
-            except Exception as table_error:
-                available_tables.append({
-                    "reference_id": ref_id,
-                    "row_count": 0,
-                    "columns": [],
-                    "sample_data": [],
-                    "accessible": False,
-                    "error": str(table_error)
-                })
-        
-        return {
-            "connected": True,
-            "message": f"Successfully discovered {len(reference_ids)} consumer tables",
-            "user": session_info[0],
-            "role": session_info[1],
-            "total_references": len(reference_ids),
-            "available_tables": available_tables
-        }
-        
-    except Exception as e:
-        logging.error(f"Multi-consumer tables test failed: {e}")
-        return {
-            "connected": False,
-            "message": f"Connection failed: {str(e)}",
-            "user": "",
-            "role": "",
-            "available_tables": [],
             "error": str(e)
         }
 
