@@ -14,9 +14,18 @@ def get_reference_ids(reference_name: str) -> list:
     """
     try:
         snowpark_session = session()
+        
+        # SYSTEM$GET_ALL_REFERENCES returns a JSON string containing an array of reference IDs
+        # Examples of what Snowflake returns:
+        # - Single table: '["16642610-c554-48ef-8392-dcd3cac56486"]'
+        # - Multiple tables: '["16642610-c554-48ef-8392-dcd3cac56486", "4608a6c3-0577-4f58-a409-5409bc728fd8"]'
+        # - No tables: '[]'
         result = snowpark_session.sql(f"SELECT SYSTEM$GET_ALL_REFERENCES('{reference_name}')").collect()
         
+        # result[0][0] contains the JSON string from Snowflake
+        # We need to parse it to convert from string to Python list
         if result and result[0][0]:
+            # json.loads() converts: '["id1", "id2"]' → ["id1", "id2"]
             return json.loads(result[0][0])
         else:
             return []
@@ -30,7 +39,7 @@ def query_reference_table(reference_name: str, reference_id: str, query: str) ->
     
     Args:
         reference_name: The name of the reference (e.g., 'CONSUMER_TABLE')
-        reference_id: The specific ID of the table to query
+        reference_id: The specific ID of the table to query (e.g., '16642610-c554-48ef-8392-dcd3cac56486')
         query: The SQL query to execute (should be a complete SELECT statement)
         
     Returns:
@@ -38,15 +47,12 @@ def query_reference_table(reference_name: str, reference_id: str, query: str) ->
     """
     try:
         snowpark_session = session()
-        # Replace any existing FROM clause with our reference
-        if "FROM" in query.upper():
-            # If query already has FROM, replace everything after FROM
-            from_index = query.upper().find("FROM")
-            base_query = query[:from_index].strip()
-            full_query = f"{base_query} FROM reference('{reference_name}', '{reference_id}')"
-        else:
-            # If no FROM clause, add it
-            full_query = f"{query} FROM reference('{reference_name}', '{reference_id}')"
+        
+        # Build the complete query using reference('NAME', 'ID') syntax
+        # Examples of generated queries:
+        # - "SELECT COUNT(*) FROM reference('CONSUMER_TABLE', '16642610-c554-48ef-8392-dcd3cac56486')"
+        # - "SELECT * FROM reference('CONSUMER_TABLE', '16642610-c554-48ef-8392-dcd3cac56486') LIMIT 5"
+        full_query = f"{query} FROM reference('{reference_name}', '{reference_id}')"
         
         result = snowpark_session.sql(full_query).collect()
         return result
