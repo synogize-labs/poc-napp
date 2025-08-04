@@ -4,7 +4,7 @@ import openai
 import os
 from dotenv import load_dotenv
 import logging
-from spcs_helpers import session, get_reference_ids
+from spcs_helpers import session, get_reference_ids, get_reference_details
 
 # Log messages at INFO level and above (for debugging)
 logging.basicConfig(level=logging.INFO)
@@ -218,8 +218,14 @@ async def test_consumer_table():
         # Get current session info
         session_info = snowpark_session.sql("SELECT CURRENT_USER(), CURRENT_ROLE()").collect()[0]
         
-        # Get all reference IDs using the helper function
-        reference_ids = get_reference_ids('CONSUMER_TABLE')
+        # Get detailed reference information including table names and IDs
+        reference_details = get_reference_details('CONSUMER_TABLE')
+        
+        # Extract reference IDs from the details
+        reference_ids = [ref['alias'] for ref in reference_details]
+        
+        # Create a mapping of reference IDs to details for easy lookup
+        ref_details_map = {ref['alias']: ref for ref in reference_details}
         
         # Unified logic for any number of tables (0, 1, or many)
         tables_info = []
@@ -242,8 +248,14 @@ async def test_consumer_table():
                     for row in sample_result:
                         sample_data.append(row.asDict())
                 
+                # Get table details from the mapping
+                table_details = ref_details_map.get(ref_id, {})
+                
                 tables_info.append({
                     "reference_id": ref_id,
+                    "table_name": table_details.get('name', 'Unknown'),
+                    "database": table_details.get('database', 'Unknown'),
+                    "schema": table_details.get('schema', 'Unknown'),
                     "row_count": row_count,
                     "columns": columns,
                     "sample_data": sample_data,
@@ -251,8 +263,14 @@ async def test_consumer_table():
                 })
                 
             except Exception as table_error:
+                # Get table details from the mapping
+                table_details = ref_details_map.get(ref_id, {})
+                
                 tables_info.append({
                     "reference_id": ref_id,
+                    "table_name": table_details.get('name', 'Unknown'),
+                    "database": table_details.get('database', 'Unknown'),
+                    "schema": table_details.get('schema', 'Unknown'),
                     "row_count": 0,
                     "columns": [],
                     "sample_data": [],

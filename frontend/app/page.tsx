@@ -34,6 +34,9 @@ interface ConsumersTableStatus {
   total_tables?: number;
   tables_info?: Array<{
     reference_id: string;
+    table_name: string;
+    database: string;
+    schema: string;
     row_count: number;
     columns: string[];
     sample_data: Array<Record<string, string | number | boolean | null>>;
@@ -312,8 +315,8 @@ export default function Home() {
                 <div className="text-sm text-gray-900">
                   {consumersTableStatus?.connected
                     ? consumersTableStatus.reference_type === "multi_valued"
-                      ? `Multi (${consumersTableStatus.total_tables || 0})`
-                      : "Connected"
+                      ? `${consumersTableStatus.total_tables || 0} tables`
+                      : "1 table"
                     : "Disconnected"}
                 </div>
                 <button
@@ -411,8 +414,11 @@ export default function Home() {
                                     className="border-l-2 border-green-300 pl-3"
                                   >
                                     <div className="font-medium text-green-800">
-                                      Table {index + 1} (ID:{" "}
-                                      {table.reference_id})
+                                      {table.database}.{table.schema}.
+                                      {table.table_name}
+                                    </div>
+                                    <div className="text-xs text-gray-500">
+                                      ID: {table.reference_id}
                                     </div>
                                     <div className="text-xs text-gray-600">
                                       <strong>Rows:</strong>{" "}
