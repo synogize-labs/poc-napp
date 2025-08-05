@@ -1,0 +1,266 @@
+INFO:     Started server process [1]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:snowflake.connector.connection:Snowflake Connector for Python Version: 3.6.0, Python Version: 3.11.13, Platform: Linux-5.15.180-14.2025053011g5f85d0d+snow+aws+5.15+amd64.x86_64-x86_64-with-glibc2.36
+INFO:snowflake.connector.connection:This connection is in OCSP Fail Open Mode. TLS Certificates would be checked for validity and revocation status. Any other Certificate Revocation related exceptions or OCSP Responder failures would be disregarded in favor of connectivity.
+INFO:snowflake.snowpark.session:Snowpark Session information: 
+"version" : 1.15.0,
+"python.version" : 3.11.13,
+"python.connector.version" : 3.6.0,
+"python.connector.session.id" : 432632096830062,
+"os.name" : Linux
+
+INFO:snowflake.connector.cursor:query: [SELECT COUNT(*) FROM core.feedback_history]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 1
+INFO:snowflake.connector.cursor:query: [SELECT id, customer_feedback, sentiment, summary, created_at FROM core.feedback_...]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 0
+INFO:snowflake.connector.cursor:query: [DESCRIBE TABLE core.feedback_history]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 5
+INFO:snowflake.connector.cursor:query: [DESCRIBE TABLE core.feedback_history]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 5
+INFO:snowflake.connector.cursor:query: [DESCRIBE TABLE core.feedback_history]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 5
+INFO:     103.44.33.167:0 - "GET /test-feedback-history-table HTTP/1.0" 200 OK
+INFO:snowflake.connector.connection:Snowflake Connector for Python Version: 3.6.0, Python Version: 3.11.13, Platform: Linux-5.15.180-14.2025053011g5f85d0d+snow+aws+5.15+amd64.x86_64-x86_64-with-glibc2.36
+INFO:snowflake.connector.connection:This connection is in OCSP Fail Open Mode. TLS Certificates would be checked for validity and revocation status. Any other Certificate Revocation related exceptions or OCSP Responder failures would be disregarded in favor of connectivity.
+INFO:snowflake.snowpark.session:Snowpark Session information: 
+"version" : 1.15.0,
+"python.version" : 3.11.13,
+"python.connector.version" : 3.6.0,
+"python.connector.session.id" : 432632096799406,
+"os.name" : Linux
+
+INFO:snowflake.connector.cursor:query: [SELECT CURRENT_USER(), CURRENT_ROLE()]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 1
+INFO:snowflake.connector.connection:Snowflake Connector for Python Version: 3.6.0, Python Version: 3.11.13, Platform: Linux-5.15.180-14.2025053011g5f85d0d+snow+aws+5.15+amd64.x86_64-x86_64-with-glibc2.36
+INFO:snowflake.connector.connection:This connection is in OCSP Fail Open Mode. TLS Certificates would be checked for validity and revocation status. Any other Certificate Revocation related exceptions or OCSP Responder failures would be disregarded in favor of connectivity.
+INFO:snowflake.snowpark.session:Snowpark Session information: 
+"version" : 1.15.0,
+"python.version" : 3.11.13,
+"python.connector.version" : 3.6.0,
+"python.connector.session.id" : 432632096833782,
+"os.name" : Linux
+
+INFO:snowflake.connector.cursor:query: [SELECT SYSTEM$GET_ALL_REFERENCES('CONSUMER_TABLE', TRUE)]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 1
+=== DEBUG: Raw result from SYSTEM$GET_ALL_REFERENCES ===
+Result type: <class 'list'>
+Result length: 1
+Result[0] type: <class 'snowflake.snowpark.row.Row'>
+Result[0] length: 1
+Result[0][0] type: <class 'str'>
+Result[0][0] value: [ ]
+Result[0][0] repr: '[ ]'
+=== END DEBUG ===
+=== DEBUG: Parsed reference details ===
+Parsed type: <class 'list'>
+Parsed value: []
+=== END DEBUG ===
+=== DEBUG: Main.py processing ===
+Reference details type: <class 'list'>
+Reference details length: 0
+Reference details: []
+Extracted reference IDs: []
+Reference details map keys: []
+=== END DEBUG ===
+INFO:     103.44.33.167:0 - "GET /test-consumer-table HTTP/1.0" 200 OK
+INFO:     103.44.33.167:0 - "GET /health HTTP/1.0" 200 OK
+INFO:snowflake.connector.connection:Snowflake Connector for Python Version: 3.6.0, Python Version: 3.11.13, Platform: Linux-5.15.180-14.2025053011g5f85d0d+snow+aws+5.15+amd64.x86_64-x86_64-with-glibc2.36
+INFO:snowflake.connector.connection:This connection is in OCSP Fail Open Mode. TLS Certificates would be checked for validity and revocation status. Any other Certificate Revocation related exceptions or OCSP Responder failures would be disregarded in favor of connectivity.
+INFO:snowflake.snowpark.session:Snowpark Session information: 
+"version" : 1.15.0,
+"python.version" : 3.11.13,
+"python.connector.version" : 3.6.0,
+"python.connector.session.id" : 432632096842138,
+"os.name" : Linux
+
+INFO:snowflake.connector.cursor:query: [SELECT CURRENT_USER(), CURRENT_ROLE()]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 1
+INFO:snowflake.connector.cursor:query: [SHOW TABLES]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 1
+INFO:snowflake.connector.cursor:query: [SHOW TABLES]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 0
+INFO:snowflake.connector.cursor:query: [SHOW TABLES]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 0
+INFO:snowflake.connector.cursor:query: [SELECT COUNT(*) FROM core.feedback_history]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 1
+INFO:snowflake.connector.cursor:query: [DESCRIBE TABLE core.feedback_history]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 5
+INFO:snowflake.connector.cursor:query: [DESCRIBE TABLE core.feedback_history]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 5
+INFO:snowflake.connector.cursor:query: [DESCRIBE TABLE core.feedback_history]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 5
+INFO:     103.44.33.167:0 - "GET /test-db-connection HTTP/1.0" 200 OK
+INFO:snowflake.connector.connection:Snowflake Connector for Python Version: 3.6.0, Python Version: 3.11.13, Platform: Linux-5.15.180-14.2025053011g5f85d0d+snow+aws+5.15+amd64.x86_64-x86_64-with-glibc2.36
+INFO:snowflake.connector.connection:This connection is in OCSP Fail Open Mode. TLS Certificates would be checked for validity and revocation status. Any other Certificate Revocation related exceptions or OCSP Responder failures would be disregarded in favor of connectivity.
+INFO:snowflake.snowpark.session:Snowpark Session information: 
+"version" : 1.15.0,
+"python.version" : 3.11.13,
+"python.connector.version" : 3.6.0,
+"python.connector.session.id" : 432632096799410,
+"os.name" : Linux
+
+INFO:snowflake.connector.cursor:query: [SELECT CURRENT_USER(), CURRENT_ROLE()]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 1
+INFO:snowflake.connector.connection:Snowflake Connector for Python Version: 3.6.0, Python Version: 3.11.13, Platform: Linux-5.15.180-14.2025053011g5f85d0d+snow+aws+5.15+amd64.x86_64-x86_64-with-glibc2.36
+INFO:snowflake.connector.connection:This connection is in OCSP Fail Open Mode. TLS Certificates would be checked for validity and revocation status. Any other Certificate Revocation related exceptions or OCSP Responder failures would be disregarded in favor of connectivity.
+INFO:snowflake.snowpark.session:Snowpark Session information: 
+"version" : 1.15.0,
+"python.version" : 3.11.13,
+"python.connector.version" : 3.6.0,
+"python.connector.session.id" : 432632096833786,
+"os.name" : Linux
+
+INFO:snowflake.connector.cursor:query: [SELECT SYSTEM$GET_ALL_REFERENCES('CONSUMER_TABLE', TRUE)]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 1
+=== DEBUG: Raw result from SYSTEM$GET_ALL_REFERENCES ===
+Result type: <class 'list'>
+Result length: 1
+Result[0] type: <class 'snowflake.snowpark.row.Row'>
+Result[0] length: 1
+Result[0][0] type: <class 'str'>
+Result[0][0] value: [ ]
+Result[0][0] repr: '[ ]'
+=== END DEBUG ===
+=== DEBUG: Parsed reference details ===
+Parsed type: <class 'list'>
+Parsed value: []
+=== END DEBUG ===
+=== DEBUG: Main.py processing ===
+Reference details type: <class 'list'>
+Reference details length: 0
+Reference details: []
+Extracted reference IDs: []
+Reference details map keys: []
+=== END DEBUG ===
+INFO:     103.44.33.167:0 - "GET /test-consumer-table HTTP/1.0" 200 OK
+INFO:snowflake.connector.connection:Snowflake Connector for Python Version: 3.6.0, Python Version: 3.11.13, Platform: Linux-5.15.180-14.2025053011g5f85d0d+snow+aws+5.15+amd64.x86_64-x86_64-with-glibc2.36
+INFO:snowflake.connector.connection:This connection is in OCSP Fail Open Mode. TLS Certificates would be checked for validity and revocation status. Any other Certificate Revocation related exceptions or OCSP Responder failures would be disregarded in favor of connectivity.
+INFO:snowflake.snowpark.session:Snowpark Session information: 
+"version" : 1.15.0,
+"python.version" : 3.11.13,
+"python.connector.version" : 3.6.0,
+"python.connector.session.id" : 432632096842142,
+"os.name" : Linux
+
+INFO:snowflake.connector.cursor:query: [SELECT CURRENT_USER(), CURRENT_ROLE()]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 1
+INFO:snowflake.connector.connection:Snowflake Connector for Python Version: 3.6.0, Python Version: 3.11.13, Platform: Linux-5.15.180-14.2025053011g5f85d0d+snow+aws+5.15+amd64.x86_64-x86_64-with-glibc2.36
+INFO:snowflake.connector.connection:This connection is in OCSP Fail Open Mode. TLS Certificates would be checked for validity and revocation status. Any other Certificate Revocation related exceptions or OCSP Responder failures would be disregarded in favor of connectivity.
+INFO:snowflake.snowpark.session:Snowpark Session information: 
+"version" : 1.15.0,
+"python.version" : 3.11.13,
+"python.connector.version" : 3.6.0,
+"python.connector.session.id" : 432632096830066,
+"os.name" : Linux
+
+INFO:snowflake.connector.cursor:query: [SELECT SYSTEM$GET_ALL_REFERENCES('CONSUMER_TABLE', TRUE)]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 1
+INFO:snowflake.connector.cursor:query: [SELECT COUNT(*) FROM reference('CONSUMER_TABLE', '60601de6-4c5d-4764-9d1d-b68041...]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 1
+INFO:snowflake.connector.cursor:query: [SELECT * FROM reference('CONSUMER_TABLE', '60601de6-4c5d-4764-9d1d-b68041144a85'...]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 3
+INFO:snowflake.connector.cursor:query: [SELECT COUNT(*) FROM reference('CONSUMER_TABLE', '6d9bd0f5-3a79-4117-8aea-6d832f...]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 1
+INFO:snowflake.connector.cursor:query: [SELECT * FROM reference('CONSUMER_TABLE', '6d9bd0f5-3a79-4117-8aea-6d832f926e12'...]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 3
+INFO:snowflake.connector.cursor:query: [SELECT COUNT(*) FROM reference('CONSUMER_TABLE', '73871891-d6ce-40cf-b532-efd55e...]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 1
+INFO:snowflake.connector.cursor:query: [SELECT * FROM reference('CONSUMER_TABLE', '73871891-d6ce-40cf-b532-efd55eea8841'...]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 3
+INFO:snowflake.connector.cursor:query: [SELECT COUNT(*) FROM reference('CONSUMER_TABLE', 'b5a0838d-3b8a-4868-9047-8616f6...]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 1
+INFO:snowflake.connector.cursor:query: [SELECT * FROM reference('CONSUMER_TABLE', 'b5a0838d-3b8a-4868-9047-8616f654442e'...]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 3
+INFO:snowflake.connector.cursor:query: [SELECT COUNT(*) FROM reference('CONSUMER_TABLE', 'f15ea261-7663-4032-896e-424d4d...]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 1
+INFO:snowflake.connector.cursor:query: [SELECT * FROM reference('CONSUMER_TABLE', 'f15ea261-7663-4032-896e-424d4d6ebac9'...]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 3
+INFO:snowflake.connector.cursor:query: [SELECT COUNT(*) FROM reference('CONSUMER_TABLE', 'fe965223-6f49-47f2-956e-92e22e...]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 1
+INFO:snowflake.connector.cursor:query: [SELECT * FROM reference('CONSUMER_TABLE', 'fe965223-6f49-47f2-956e-92e22e38777a'...]
+INFO:snowflake.connector.cursor:query execution done
+INFO:snowflake.connector.cursor:Number of results in first chunk: 3
+=== DEBUG: Raw result from SYSTEM$GET_ALL_REFERENCES ===
+Result type: <class 'list'>
+Result length: 1
+Result[0] type: <class 'snowflake.snowpark.row.Row'>
+Result[0] length: 1
+Result[0][0] type: <class 'str'>
+Result[0][0] value: [ {
+  "alias" : "60601de6-4c5d-4764-9d1d-b68041144a85",
+  "database" : "SUPERSTORE",
+  "schema" : "DEMO",
+  "name" : "DIM_DATE"
+}, {
+  "alias" : "6d9bd0f5-3a79-4117-8aea-6d832f926e12",
+  "database" : "SUPERSTORE",
+  "schema" : "DEMO",
+  "name" : "FACT_SALES"
+}, {
+  "alias" : "73871891-d6ce-40cf-b532-efd55eea8841",
+  "database" : "SUPERSTORE",
+  "schema" : "DEMO",
+  "name" : "DIM_PRODUCT"
+}, {
+  "alias" : "b5a0838d-3b8a-4868-9047-8616f654442e",
+  "database" : "SUPERSTORE",
+  "schema" : "DEMO",
+  "name" : "DIM_CUSTOMER"
+}, {
+  "alias" : "f15ea261-7663-4032-896e-424d4d6ebac9",
+  "database" : "SUPERSTORE",
+  "schema" : "DEMO",
+  "name" : "DIM_REGION"
+}, {
+  "alias" : "fe965223-6f49-47f2-956e-92e22e38777a",
+  "database" : "SUPERSTORE",
+  "schema" : "DEMO",
+  "name" : "DIM_SHIP_MODE"
+} ]
+Result[0][0] repr: '[ {\n  "alias" : "60601de6-4c5d-4764-9d1d-b68041144a85",\n  "database" : "SUPERSTORE",\n  "schema" : "DEMO",\n  "name" : "DIM_DATE"\n}, {\n  "alias" : "6d9bd0f5-3a79-4117-8aea-6d832f926e12",\n  "database" : "SUPERSTORE",\n  "schema" : "DEMO",\n  "name" : "FACT_SALES"\n}, {\n  "alias" : "73871891-d6ce-40cf-b532-efd55eea8841",\n  "database" : "SUPERSTORE",\n  "schema" : "DEMO",\n  "name" : "DIM_PRODUCT"\n}, {\n  "alias" : "b5a0838d-3b8a-4868-9047-8616f654442e",\n  "database" : "SUPERSTORE",\n  "schema" : "DEMO",\n  "name" : "DIM_CUSTOMER"\n}, {\n  "alias" : "f15ea261-7663-4032-896e-424d4d6ebac9",\n  "database" : "SUPERSTORE",\n  "schema" : "DEMO",\n  "name" : "DIM_REGION"\n}, {\n  "alias" : "fe965223-6f49-47f2-956e-92e22e38777a",\n  "database" : "SUPERSTORE",\n  "schema" : "DEMO",\n  "name" : "DIM_SHIP_MODE"\n} ]'
+=== END DEBUG ===
+=== DEBUG: Parsed reference details ===
+Parsed type: <class 'list'>
+Parsed value: [{'alias': '60601de6-4c5d-4764-9d1d-b68041144a85', 'database': 'SUPERSTORE', 'schema': 'DEMO', 'name': 'DIM_DATE'}, {'alias': '6d9bd0f5-3a79-4117-8aea-6d832f926e12', 'database': 'SUPERSTORE', 'schema': 'DEMO', 'name': 'FACT_SALES'}, {'alias': '73871891-d6ce-40cf-b532-efd55eea8841', 'database': 'SUPERSTORE', 'schema': 'DEMO', 'name': 'DIM_PRODUCT'}, {'alias': 'b5a0838d-3b8a-4868-9047-8616f654442e', 'database': 'SUPERSTORE', 'schema': 'DEMO', 'name': 'DIM_CUSTOMER'}, {'alias': 'f15ea261-7663-4032-896e-424d4d6ebac9', 'database': 'SUPERSTORE', 'schema': 'DEMO', 'name': 'DIM_REGION'}, {'alias': 'fe965223-6f49-47f2-956e-92e22e38777a', 'database': 'SUPERSTORE', 'schema': 'DEMO', 'name': 'DIM_SHIP_MODE'}]
+=== END DEBUG ===
+=== DEBUG: Main.py processing ===
+Reference details type: <class 'list'>
+Reference details length: 6
+Reference details: [{'alias': '60601de6-4c5d-4764-9d1d-b68041144a85', 'database': 'SUPERSTORE', 'schema': 'DEMO', 'name': 'DIM_DATE'}, {'alias': '6d9bd0f5-3a79-4117-8aea-6d832f926e12', 'database': 'SUPERSTORE', 'schema': 'DEMO', 'name': 'FACT_SALES'}, {'alias': '73871891-d6ce-40cf-b532-efd55eea8841', 'database': 'SUPERSTORE', 'schema': 'DEMO', 'name': 'DIM_PRODUCT'}, {'alias': 'b5a0838d-3b8a-4868-9047-8616f654442e', 'database': 'SUPERSTORE', 'schema': 'DEMO', 'name': 'DIM_CUSTOMER'}, {'alias': 'f15ea261-7663-4032-896e-424d4d6ebac9', 'database': 'SUPERSTORE', 'schema': 'DEMO', 'name': 'DIM_REGION'}, {'alias': 'fe965223-6f49-47f2-956e-92e22e38777a', 'database': 'SUPERSTORE', 'schema': 'DEMO', 'name': 'DIM_SHIP_MODE'}]
+Extracted reference IDs: ['60601de6-4c5d-4764-9d1d-b68041144a85', '6d9bd0f5-3a79-4117-8aea-6d832f926e12', '73871891-d6ce-40cf-b532-efd55eea8841', 'b5a0838d-3b8a-4868-9047-8616f654442e', 'f15ea261-7663-4032-896e-424d4d6ebac9', 'fe965223-6f49-47f2-956e-92e22e38777a']
+Reference details map keys: ['60601de6-4c5d-4764-9d1d-b68041144a85', '6d9bd0f5-3a79-4117-8aea-6d832f926e12', '73871891-d6ce-40cf-b532-efd55eea8841', 'b5a0838d-3b8a-4868-9047-8616f654442e', 'f15ea261-7663-4032-896e-424d4d6ebac9', 'fe965223-6f49-47f2-956e-92e22e38777a']
+=== END DEBUG ===
+INFO:     103.44.33.167:0 - "GET /test-consumer-table HTTP/1.0" 200 OK
+
