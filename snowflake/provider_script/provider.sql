@@ -26,7 +26,7 @@ SHOW IMAGE REPOSITORIES;
 USE ROLE ACCOUNTADMIN;
 
 -- Create the package.
-CREATE APPLICATION PACKAGE IF NOT EXISTS poc_napp_provider_package;
+CREATE APPLICATION PACKAGE IF NOT EXISTS poc_napp_provider_package ENABLE_RELEASE_CHANNELS=FALSE;
 
 -- Copy our native app code and docker image over to the package.
 ALTER APPLICATION PACKAGE poc_napp_provider_package ADD VERSION v1 USING @poc_napp_db.schema.stage;
