@@ -232,11 +232,11 @@ async def test_consumer_table():
         
         for ref_id in reference_ids:
             try:
-                # Get row count using direct SQL
+                # Get row count using reference system
                 count_result = snowpark_session.sql(f"SELECT COUNT(*) FROM reference('CONSUMER_TABLE', '{ref_id}')").collect()
                 row_count = count_result[0][0] if count_result else 0
                 
-                # Get sample data using direct SQL
+                # Get sample data using reference system
                 sample_result = snowpark_session.sql(f"SELECT * FROM reference('CONSUMER_TABLE', '{ref_id}') LIMIT 3").collect()
                 
                 sample_data = []
